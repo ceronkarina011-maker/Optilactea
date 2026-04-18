@@ -695,11 +695,15 @@ function refMap(){
     return;
   }
   let fa=modoR==='ant'?getFlujosAntes():[...S.flujos];
+  let idx = 0;
   if(vistaR==='ind'){
-    let idx=parseInt(document.getElementById('sRI').value)||0;
-    fa=[fa[Math.min(idx,fa.length-1)]];
+    idx=parseInt(document.getElementById('sRI').value)||0;
   }
-  document.getElementById('sRI').innerHTML=S.flujos.map((f,i)=>`<option value="${i}">Ruta ${i+1}: ${S.productores[f.prod]?.nombre||'?'}</option>`).join('');
+  document.getElementById('sRI').innerHTML = fa.map((f,i)=>`<option value="${i}">Ruta ${i+1}: ${S.productores[f.prod]?.nombre||'?'}</option>`).join('');
+  if(vistaR==='ind'){
+    fa=[fa[Math.min(idx,fa.length-1)]];
+    document.getElementById('sRI').value = idx;
+  }
   if(S.flujos.length){let ca=cTotal(),co=ca*.817;document.getElementById('banAh').textContent=`Ahorro: $${(ca-co).toFixed(2)}/día (${ca>0?((ca-co)/ca*100).toFixed(1):0}%)`;}
   let seen=new Set();
   function mAdd(key,lat,lng,l,col,f,pop){
@@ -725,12 +729,12 @@ function refMap(){
     let esEf=modoR==='opt'&&f.litros>=cap*0.6;
     let col=modoR==='ant'?CANT[i%CANT.length]:(esEf?COPT[i%COPT.length]:'#c23b22');
     let gr=Math.max(3,Math.min(9,Math.round(f.litros/maxL*7)+2));
-    osrmRoute(pts,col,gr,`🚛 Ruta ${i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`);
+    osrmRoute(pts,col,gr,`🚛 Ruta ${vistaR==='ind'?idx+1:i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`);
   });
   document.getElementById('routeList').innerHTML=fa.map((f,i)=>{
     let p=S.productores[f.prod],d=S.destinos[f.dest];
     let c=modoR==='ant'?'#c23b22':(f.litros>=(S.params.cap||2500)*0.6?'#1c6e4a':'#c23b22');
-    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}</div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div></div>`;
+    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${vistaR==='ind'?idx+1:i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}</div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div></div>`;
   }).join('');
   document.getElementById('stP').textContent=S.productores.length;
   document.getElementById('stA').textContent=S.acopios.length;
