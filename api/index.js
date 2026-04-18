@@ -32,6 +32,13 @@ app.post('/api/state', async (req, res) => {
 
 app.get('/api/ping', (req, res) => res.json({ ok: true }));
 
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
 // Initialize DB on startup
 initDb().catch((err) => {
   console.error('Database initialization failed', err);
