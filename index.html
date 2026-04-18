@@ -438,8 +438,30 @@ let vistaR='todas',modoR='opt';
 // PERSISTENCIA
 // ============================================================
 function save(){try{localStorage.setItem('olc4',JSON.stringify(S));}catch(e){}}
-function load(){
-  try{let d=localStorage.getItem('olc4');if(d){let p=JSON.parse(d);S=Object.assign({productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}},p);}}catch(e){}
+function save(){
+  try{localStorage.setItem('olc4',JSON.stringify(S));}catch(e){}
+  fetch('/api/state',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(S)
+  }).catch(()=>{});
+}
+async function load(){
+  let loaded=false;
+  try{
+    const response=await fetch('/api/state');
+    if(response.ok){
+      const data=await response.json();
+      S=Object.assign({productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}},data);
+      loaded=true;
+    }
+  }catch(e){}
+  if(!loaded){
+    try{
+      let d=localStorage.getItem('olc4');
+      if(d){let p=JSON.parse(d);S=Object.assign({productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}},p);}
+    }catch(e){}
+  }
   syncParams();renderAll();
 }
 function syncParams(){
