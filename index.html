@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>OptilacteaCarchi PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --gd:#0a2e1e;--gk:#123d28;--gm:#1c6e4a;--gl:#2d9d6e;--gp:#d4ede2;--bg:#eef5f0;
+  --am:#f59e0b;--ap:#fef3c7;--rd:#dc2626;--rp:#fee2e2;
+  --g50:#f8faf9;--g100:#edf2ee;--g200:#d6e4db;--g400:#8aaa96;--g600:#4a6358;--g800:#1e3229;
+  --fn:'IBM Plex Sans',system-ui,sans-serif;--mo:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fn);background:var(--bg);padding:20px;color:var(--g800)}
+.app{max-width:1480px;margin:0 auto}
+.header{background:linear-gradient(135deg,var(--gd),var(--gk) 60%,#0e4a2c);border-radius:20px;padding:20px 30px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border:1px solid rgba(255,255,255,.06)}
+.header h1{font-size:1.5rem;font-weight:700;color:white;letter-spacing:-.02em}
+.header p{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:3px}
+.hbadge{background:var(--am);padding:5px 16px;border-radius:30px;font-size:.7rem;font-weight:700;color:var(--gd);white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;gap:5px;background:white;padding:7px 14px;border-radius:60px;margin-bottom:18px;border:1px solid var(--gp);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.tab{padding:8px 20px;font-weight:600;font-size:.8rem;border-radius:40px;cursor:pointer;background:transparent;border:none;color:var(--gm);font-family:var(--fn);transition:all .2s}
+.tab.active{background:var(--gm);color:white}
+.tab:hover:not(.active){background:var(--gp)}
+.panel{display:none}.panel.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.card{background:white;border-radius:18px;padding:20px 24px;margin-bottom:18px;border:1px solid var(--g200);box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.ct{font-size:.68rem;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--g50);border-radius:14px;padding:14px 16px;border:1px solid var(--g200);text-align:center}
+.kpi .v{font-size:1.8rem;font-weight:700;color:var(--gm);font-family:var(--mo);line-height:1}
+.kpi .l{font-size:.68rem;color:var(--g400);margin-top:4px;font-weight:600}
+.kpi.hl{background:var(--gd);border-color:var(--gm)}
+.kpi.hl .v{color:#5ef2a0}
+.kpi.hl .l{color:rgba(255,255,255,.45)}
+.tbl{overflow-x:auto;border-radius:12px;border:1px solid var(--g200)}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+thead{background:var(--gd)}
+thead th{padding:11px 13px;text-align:left;color:rgba(255,255,255,.75);font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+tbody tr:hover{background:var(--g50)}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--g100);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-family:var(--mo)}
+.badge{padding:2px 9px;border-radius:20px;font-size:.65rem;font-weight:700;display:inline-block}
+.bok{background:#dcfce7;color:#166534}
+.bwrn{background:var(--ap);color:#92400e}
+.berr{background:var(--rp);color:#991b1b}
+.btn{padding:8px 18px;font-size:.76rem;font-weight:600;border-radius:30px;cursor:pointer;border:1.5px solid var(--g200);background:white;font-family:var(--fn);transition:all .2s;color:var(--g800)}
+.btn:hover{border-color:var(--gm);color:var(--gm)}
+.bp{background:var(--gm);color:white;border:none}
+.bp:hover{background:#157a52}
+.bdk{background:var(--gd);color:white;border:none}
+.bam{background:var(--am);color:var(--gd);border:none}
+.brd{background:#fee2e2;border-color:#fca5a5;color:#b91c1c}
+.bs{padding:4px 11px;font-size:.7rem}
+input,select{width:100%;padding:9px 11px;border-radius:10px;border:1.5px solid var(--g200);font-size:.78rem;font-family:var(--fn);color:var(--g800);transition:border-color .2s}
+input:focus,select:focus{outline:none;border-color:var(--gm)}
+label{font-size:.68rem;font-weight:700;color:var(--gm);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.fg{margin-bottom:11px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex}
+.modal{background:white;border-radius:18px;padding:24px;width:min(460px,95vw);box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal h2{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--gd)}
+.mft{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.cba{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:start;margin-bottom:18px}
+.ccol{border-radius:14px;padding:16px}
+.antes{background:#fef2f2;border:2px solid #fca5a5}
+.desp{background:#f0fdf4;border:2px solid #86efac}
+.cdiv{display:flex;align-items:center;justify-content:center;font-size:1.4rem;padding-top:36px}
+.ctit{font-size:.78rem;font-weight:700;margin-bottom:10px}
+.antes .ctit{color:#dc2626}
+.desp .ctit{color:#16a34a}
+.cri{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.76rem}
+.cri:last-child{border-bottom:none}
+.cv{font-weight:700;font-family:var(--mo);font-size:.8rem}
+.batbl{border-radius:12px;overflow:hidden;border:1px solid var(--g200);margin-top:14px}
+.bah{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;background:var(--g800)}
+.bac{padding:9px 13px;font-size:.67rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.bar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid var(--g100);align-items:center}
+.bar:last-child{border-bottom:none}
+.bar:hover{background:var(--g50)}
+.bar .bac{color:var(--g800);font-weight:400;font-size:.76rem}
+.bar .bac.met{font-weight:600}
+.tob{background:var(--gd);border-radius:13px;padding:14px 16px;border:1px solid rgba(255,255,255,.07)}
+.tob .tv{font-size:1.6rem;font-weight:700;color:#5ef2a0;font-family:var(--mo)}
+.tob .tl{font-size:.68rem;color:rgba(255,255,255,.45);margin-top:2px;font-weight:600}
+.rv{background:var(--gd);border-radius:13px;padding:13px 15px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07)}
+.rvh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rvn{font-size:.76rem;font-weight:600;color:white}
+.rvl{font-family:var(--mo);font-size:.72rem;color:#5ef2a0}
+.rvp{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.rn{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);padding:2px 9px;border-radius:20px;font-size:.68rem}
+.ra{color:rgba(255,255,255,.3);font-size:.62rem}
+.fml{background:var(--gd);color:#5ef2a0;padding:15px;border-radius:12px;font-family:var(--mo);font-size:.68rem;overflow-x:auto;line-height:1.7;border:1px solid rgba(94,242,160,.12)}
+#map-container{width:100%;height:490px;border-radius:16px;overflow:hidden}
+.rpi{padding:11px 13px;border-radius:11px;margin-bottom:7px;border:1px solid var(--g200);cursor:pointer;transition:background .15s}
+.rpi:hover{background:var(--g50)}
+@media(max-width:700px){
+  .cba{grid-template-columns:1fr}.cdiv{display:none}
+  .bah,.bar{grid-template-columns:1fr 1fr}
+  .bac:nth-child(n+3){display:none}
+  #mgrid{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <div><h1>🥛 OptilacteaCarchi PRO</h1><p>Optimización Multiobjetivo · Cadena Láctea 4 Niveles · Carchi, Ecuador · UPEC 2025</p></div>
+  <div class="hbadge">📊 Sistema de Apoyo a Decisiones</div>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="showTab('datos',this)">🗂️ Datos entrada</button>
+  <button class="tab" onclick="showTab('modelo',this)">⚙️ Modelo TORA</button>
+  <button class="tab" onclick="showTab('red',this)">🗺️ Red logística</button>
+  <button class="tab" onclick="showTab('legal',this)">⚖️ Cumplimiento</button>
+  <button class="tab" onclick="showTab('exportar',this)">📁 Exportar</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="panel active">
+  <div id="dempty" class="card" style="text-align:center;padding:40px">
+    <div style="font-size:3rem;margin-bottom:12px">📋</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--g600);margin-bottom:6px">Sin datos aún</div>
+    <div style="font-size:.8rem;color:var(--g400)">Ve a <strong>Datos entrada</strong> y agrega productores, acopios, plantas, destinos y rutas.</div>
+  </div>
+  <div id="dcont" style="display:none">
+    <div class="kg">
+      <div class="kpi hl"><div class="v" id="kA">—</div><div class="l">Ahorro total</div></div>
+      <div class="kpi"><div class="v" id="kC">—</div><div class="l">Costo actual/día</div></div>
+      <div class="kpi"><div class="v" id="kO">—</div><div class="l">Costo optimizado/día</div></div>
+      <div class="kpi"><div class="v" id="kL">—</div><div class="l">Litros/día</div></div>
+      <div class="kpi"><div class="v" id="kR">—</div><div class="l">Rutas activas</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">🔥 ANTES vs DESPUÉS</div>
+      <div class="cba">
+        <div class="ccol antes">
+          <div class="ctit">❌ Sin modelo</div>
+          <div class="cri"><span>Rutas</span><span class="cv" style="color:#dc2626" id="bfR">—</span></div>
+          <div class="cri"><span>Costo/día</span><span class="cv" style="color:#dc2626" id="bfC">—</span></div>
+          <div class="cri"><span>Uso vehículo</span><span class="cv" style="color:#dc2626">60%</span></div>
+          <div class="cri"><span>Nivel servicio</span><span class="cv" style="color:#dc2626" id="bfS">—</span></div>
+        </div>
+        <div class="cdiv">→</div>
+        <div class="ccol desp">
+          <div class="ctit">✅ Con modelo TORA</div>
+          <div class="cri"><span>Rutas</span><span class="cv" style="color:#16a34a" id="afR">—</span></div>
+          <div class="cri"><span>Costo/día</span><span class="cv" style="color:#16a34a" id="afC">—</span></div>
+          <div class="cri"><span>Uso vehículo</span><span class="cv" style="color:#16a34a">85%</span></div>
+          <div class="cri"><span>Nivel servicio</span><span class="cv" style="color:#16a34a" id="afS">—</span></div>
+        </div>
+      </div>
+      <div class="batbl">
+        <div class="bah"><div class="bac">Indicador</div><div class="bac">❌ Antes</div><div class="bac">✅ Después</div><div class="bac">Δ Mejora</div></div>
+        <div class="bar"><div class="bac met">Costo total</div><div class="bac" id="b1a" style="color:#dc2626;font-family:var(--mo);font-weight:700">—</div><div class="bac" id="b1d" style="color:#16a34a;font-family:var(--mo);font-weight:700">—</div><div class="bac" id="b1m" style="color:#16a34a;font-family:var(--mo);font-weight:700">—</div></div>
+        <div class="bar"><div class="bac met">Rutas</div><div class="bac" id="b2a" style="color:#dc2626;font-family:var(--mo);font-weight:700">—</div><div class="bac" id="b2d" style="color:#16a34a;font-family:var(--mo);font-weight:700">—</div><div class="bac" id="b2m" style="color:#16a34a;font-family:var(--mo);font-weight:700">—</div></div>
+        <div class="bar"><div class="bac met">Uso vehículo</div><div class="bac" style="color:#dc2626;font-family:var(--mo);font-weight:700">60%</div><div class="bac" style="color:#16a34a;font-family:var(--mo);font-weight:700">85%</div><div class="bac" style="color:#16a34a;font-family:var(--mo);font-weight:700">▲ +25pp</div></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">📈 Costos por ruta</div><canvas id="chC" height="200"></canvas></div>
+      <div class="card"><div class="ct">🥧 Distribución litros</div><canvas id="chF" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">💰 MATRIZ PRESUPUESTARIA</div>
+      <div class="tbl"><table>
+        <thead><tr><th>Tramo</th><th>Costo actual</th><th>Costo optimizado</th><th>Ahorro</th><th>%</th></tr></thead>
+        <tbody id="tbMat"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--g400)">Sin datos.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- DATOS ENTRADA -->
+<div id="tab-datos" class="panel">
+  <div class="g2">
+    <div class="card"><div class="ct">🏡 Productores</div><div id="lProd" class="tbl" style="margin-bottom:10px"></div><button class="btn bp bs" onclick="abrirM('mProd',-1)">+ Agregar productor</button></div>
+    <div class="card"><div class="ct">🧊 Centros de Acopio</div><div id="lAcop" class="tbl" style="margin-bottom:10px"></div><button class="btn bp bs" onclick="abrirM('mAcop',-1)">+ Agregar acopio</button></div>
+    <div class="card"><div class="ct">🏭 Plantas</div><div id="lPlan" class="tbl" style="margin-bottom:10px"></div><button class="btn bp bs" onclick="abrirM('mPlan',-1)">+ Agregar planta</button></div>
+    <div class="card"><div class="ct">🏪 Destinos</div><div id="lDest" class="tbl" style="margin-bottom:10px"></div><button class="btn bp bs" onclick="abrirM('mDest',-1)">+ Agregar destino</button></div>
+  </div>
+  <div class="card">
+    <div class="ct">🔧 Parámetros</div>
+    <div class="g3">
+      <div class="fg"><label>Costo por km ($/km)</label><input type="number" id="pKm" value="1.2" step=".05" onchange="savParams()"></div>
+      <div class="fg"><label>Capacidad vehículo (L)</label><input type="number" id="pCap" value="2500" onchange="savParams()"></div>
+      <div class="fg"><label>Factor demanda (%)</label><input type="number" id="pDem" value="100" step="5" onchange="savParams()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">➕ Agregar ruta de flujo</div>
+    <div class="g4">
+      <div class="fg"><label>Productor</label><select id="sProd"></select></div>
+      <div class="fg"><label>Acopio</label><select id="sAcop"></select></div>
+      <div class="fg"><label>Planta</label><select id="sPlan"></select></div>
+      <div class="fg"><label>Destino</label><select id="sDest"></select></div>
+      <div class="fg"><label>Litros/día</label><input type="number" id="nL" placeholder="500" min="1"></div>
+      <div class="fg" style="display:flex;align-items:flex-end"><button class="btn bp" onclick="addFlujo()">Agregar ruta</button></div>
+    </div>
+    <div class="ct" style="margin-top:16px">RUTAS ACTUALES</div>
+    <div class="tbl"><table><thead><tr><th>#</th><th>Productor</th><th>Acopio</th><th>Planta</th><th>Destino</th><th>Litros</th><th></th></tr></thead><tbody id="tbFl"><tr><td colspan="7" style="text-align:center;padding:18px;color:var(--g400)">Sin rutas</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- MODELO TORA -->
+<div id="tab-modelo" class="panel">
+  <div class="card">
+    <div class="ct">💡 ¿QUÉ ES EL MODELO TORA?</div>
+    <div class="g3" style="margin-bottom:0">
+      <div style="background:var(--gp);border-radius:12px;padding:14px;border:1px solid var(--g200)"><div style="font-weight:700;color:var(--gd);margin-bottom:7px;font-size:.82rem">🎯 Función</div><div style="font-size:.76rem;color:var(--g600);line-height:1.6">Decide <strong>de dónde sale la leche, por dónde pasa y a dónde va</strong> usando la mejor ruta y el menor costo posible.</div></div>
+      <div style="background:#fef9e6;border-radius:12px;padding:14px;border:1px solid #fde68a"><div style="font-weight:700;color:#92400e;margin-bottom:7px;font-size:.82rem">🔗 4 Niveles</div><div style="font-size:.76rem;color:var(--g600);line-height:1.8"><b>1.</b> Finca → <b>2.</b> Acopio → <b>3.</b> Planta → <b>4.</b> Destino</div></div>
+      <div style="background:#f0fdf4;border-radius:12px;padding:14px;border:1px solid #86efac"><div style="font-weight:700;color:#166534;margin-bottom:7px;font-size:.82rem">📊 Responde</div><div style="font-size:.76rem;color:var(--g600);line-height:1.8">✔ ¿Cuánta leche por ruta?<br>✔ ¿Qué rutas usar?<br>✔ ¿Cómo reducir costos?</div></div>
+    </div>
+  </div>
+  <div class="g4" style="margin-bottom:18px">
+    <div class="tob"><div class="tv" id="tC">—</div><div class="tl">COSTO ÓPTIMO / DÍA</div></div>
+    <div class="tob"><div class="tv" id="tM">—</div><div class="tl">MEJORA vs ACTUAL</div></div>
+    <div class="tob"><div class="tv" id="tL">—</div><div class="tl">LITROS ASIGNADOS</div></div>
+    <div class="tob"><div class="tv" id="tR">—</div><div class="tl">RUTAS SELECCIONADAS</div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div class="ct" style="margin:0">📦 TABLA DE ASIGNACIÓN ÓPTIMA</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn bp bs" onclick="optimizar()">▶ Optimizar</button>
+        <button class="btn bs" onclick="copiarTbl()">📋 Copiar</button>
+      </div>
+    </div>
+    <div class="tbl"><table id="tblOpt"><thead><tr><th>#</th><th>Origen (Finca)</th><th>Centro Acopio</th><th>Planta</th><th>Destino</th><th class="num">Litros/día</th><th class="num">Costo ($)</th><th>Estado</th></tr></thead><tbody id="tbOpt"><tr><td colspan="8" style="text-align:center;padding:28px;color:var(--g400)">Presiona "Optimizar"</td></tr></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="ct">🧭 RUTAS SELECCIONADAS</div>
+    <div id="rutasV"></div>
+    <div style="height:1px;background:var(--g200);margin:16px 0"></div>
+    <div class="ct">💧 FLUJO POR RUTA (LITROS)</div>
+    <div id="flujoB"></div>
+  </div>
+  <div class="card">
+    <div class="ct">🔣 FUNCIÓN OBJETIVO</div>
+    <div class="fml" id="fmlBox">Min Z = Σ Σ Σ Σ (c_ij + c_jk + c_kl) · x_ijkl
+
+Sujeto a:
+  Σ x_ijkl ≤ oferta_i     ∀ i  (capacidad productores)
+  Σ x_ijkl ≥ demanda_l    ∀ l  (satisfacer demanda)
+  x_ijkl ≥ 0              ∀ i,j,k,l
+
+Variables:
+  i = Finca/Productor   j = Centro de Acopio
+  k = Planta            l = Destino/Mercado
+  c = Costo unitario ($/L)   x = Flujo (L/día)</div>
+  </div>
+</div>
+
+<!-- RED LOGÍSTICA -->
+<div id="tab-red" class="panel">
+  <div class="card" style="padding:12px 18px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:.7rem;font-weight:700;color:var(--g400);text-transform:uppercase">Vista:</span>
+        <div style="display:flex;background:var(--g100);border-radius:30px;padding:3px;gap:2px">
+          <button id="btnT" class="btn bp bs" style="border-radius:26px" onclick="setVista('todas')">🌐 Todas las rutas</button>
+          <button id="btnI" class="btn bs" style="border-radius:26px;border:none" onclick="setVista('ind')">🔍 Por ruta individual</button>
+        </div>
+        <div id="wInd" style="display:none"><select id="sRI" style="width:auto;padding:5px 11px;border-radius:20px;font-size:.76rem" onchange="refMap()"></select></div>
+        <div style="display:flex;background:var(--g100);border-radius:30px;padding:3px;gap:2px">
+          <button id="btnOp" class="btn bp bs" style="border-radius:26px" onclick="setModo('opt')">✅ Optimizado</button>
+          <button id="btnAn" class="btn bs" style="border-radius:26px;border:none" onclick="setModo('ant')">❌ Sin optimizar</button>
+        </div>
+      </div>
+      <button class="btn bs" onclick="refMap()">↻ Actualizar mapa</button>
+    </div>
+  </div>
+  <div id="bannerAnt" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;color:#b91c1c"><strong>❌ Sin optimizar:</strong> Rutas dispersas, vehículos al 60%, mayor costo y distancia.</div>
+  <div id="bannerOpt" style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;color:#166534"><strong>✅ Optimizado (TORA):</strong> Rutas consolidadas, 85% uso vehículos. <span id="banAh"></span></div>
+  <div style="display:grid;grid-template-columns:1fr 270px;gap:14px;margin-bottom:14px" id="mgrid">
+    <div class="card" style="padding:0;overflow:hidden;border-radius:18px"><div id="map-container"></div></div>
+    <div class="card" style="padding:15px;overflow-y:auto;max-height:530px">
+      <div class="ct">RUTAS ACTIVAS</div>
+      <div id="routeList"></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--g100)">
+        <div class="ct">LEYENDA</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:.72rem;color:var(--g600)">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:5px;background:var(--gm);border-radius:3px"></div>Ruta óptima (alto vol.)</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:3px;background:#c23b22;border-radius:3px"></div>Ruta ineficiente</div>
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;background:#f59e0b;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:white">F</div>Finca</div>
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;background:#0ea5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:white">A</div>Centro Acopio</div>
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;background:#8b5cf6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:white">P</div>Planta</div>
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;background:#dc2626;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:white">D</div>Destino</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📊 ESTADÍSTICAS DE LA RED</div>
+      <table style="font-size:.8rem"><tbody>
+        <tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g600)">Productores</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-weight:700" id="stP">—</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g600)">Centros de acopio</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-weight:700" id="stA">—</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g600)">Plantas</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-weight:700" id="stPl">—</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g600)">Destinos</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-weight:700" id="stD">—</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g600)">Rutas activas</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-weight:700" id="stR">—</td></tr>
+        <tr><td style="padding:8px 0;color:var(--g600)">Litros/día</td><td class="num" style="padding:8px 0;font-weight:700;color:var(--gm)" id="stL">—</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><div class="ct">🚛 UTILIZACIÓN DE VEHÍCULOS</div><div id="vehDiv"></div></div>
+  </div>
+</div>
+
+<!-- CUMPLIMIENTO -->
+<div id="tab-legal" class="panel">
+  <div class="card"><div class="ct">⚖️ VERIFICACIONES — ANT / AGROCALIDAD / ARCSA</div><div id="listaL" class="tbl" style="margin-bottom:12px"></div><button class="btn bp bs" onclick="abrirM('mLeg',-1)">+ Nueva verificación</button></div>
+  <div class="card"><div class="ct">📊 Radar de cumplimiento</div><canvas id="chLeg" height="200"></canvas></div>
+</div>
+
+<!-- EXPORTAR -->
+<div id="tab-exportar" class="panel">
+  <div class="card">
+    <div class="ct">💾 GUARDAR Y CARGAR ENTRE EQUIPOS</div>
+    <div style="background:var(--g50);border:1px solid var(--g200);border-radius:11px;padding:13px;margin-bottom:14px;font-size:.78rem;color:var(--g600)">Los datos se guardan automáticamente en este navegador. Para llevarlos a otro equipo, exporta la sesión.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <button class="btn bp" onclick="expSesion()">⬇ Exportar sesión (.json)</button>
+      <button class="btn" onclick="document.getElementById('impF').click()">⬆ Importar sesión (.json)</button>
+      <button class="btn brd" onclick="borrarTodo()">🗑 Borrar todos los datos</button>
+      <input type="file" id="impF" accept=".json" style="display:none" onchange="impSesion(event)">
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">📊 EXPORTAR A EXCEL</div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:11px;padding:13px;margin-bottom:14px;font-size:.78rem;color:#166534"><strong>✓ Exportación completa:</strong> Un archivo Excel con hojas separadas para cada nivel.</div>
+    <div class="g2" style="margin-bottom:14px">
+      <button class="btn bp" style="padding:14px 18px;border-radius:13px;text-align:left;display:flex;align-items:center;gap:10px" onclick="expExcel()"><span style="font-size:1.2rem">📋</span><div><div>Exportar TODO a Excel (.xlsx)</div><div style="font-size:.68rem;opacity:.75;margin-top:2px">Productores, Acopios, Plantas, Destinos, Flujos, Resultados VAM.</div></div></button>
+      <button class="btn bdk" style="padding:14px 18px;border-radius:13px;text-align:left;display:flex;align-items:center;gap:10px" onclick="expResumen()"><span style="font-size:1.2rem">📄</span><div><div>Exportar Resumen Ejecutivo</div><div style="font-size:.68rem;opacity:.75;margin-top:2px">Métricas principales, costos y comparación.</div></div></button>
+    </div>
+    <div class="ct">📂 EXPORTACIONES INDIVIDUALES (CSV)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn bs" onclick="expCSV('productores')">📋 Productores</button>
+      <button class="btn bs" onclick="expCSV('acopios')">📋 Acopios</button>
+      <button class="btn bs" onclick="expCSV('plantas')">📋 Plantas</button>
+      <button class="btn bs" onclick="expCSV('destinos')">📋 Destinos</button>
+      <button class="btn bs" onclick="expCSV('flujos')">📋 Flujos</button>
+      <button class="btn bs" onclick="expCSV('legales')">📋 Legales</button>
+      <button class="btn bs" onclick="expCSV('vam')">📋 Resultados VAM</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">👁 VISTA PREVIA</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="prevT">
+      <button class="btn bp bs" onclick="previa('productores',this)">Productores</button>
+      <button class="btn bs" onclick="previa('acopios',this)">Acopios</button>
+      <button class="btn bs" onclick="previa('plantas',this)">Plantas</button>
+      <button class="btn bs" onclick="previa('destinos',this)">Destinos</button>
+      <button class="btn bs" onclick="previa('flujos',this)">Flujos</button>
+    </div>
+    <div id="prevD" class="tbl"></div>
+  </div>
+  <div class="card">
+    <div class="ct">🔣 FUNCIÓN OBJETIVO — EXCEL SOLVER / TORA</div>
+    <div class="fml" id="fmlExp">Ejecuta la optimización en "Modelo TORA" para generar la función objetivo...</div>
+    <button class="btn bs" style="margin-top:11px" onclick="copiarFml()">📋 Copiar fórmula</button>
+  </div>
+</div>
+</div><!-- /.app -->
+
+<!-- MODALES -->
+<div id="mProd" class="modal-bg"><div class="modal">
+  <h2>Productor / Finca</h2>
+  <div class="fg"><label>Nombre *</label><input id="mPN" placeholder="Ej: Finca La Troya"></div>
+  <div class="fg"><label>Cantón</label><input id="mPC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Oferta L/día</label><input type="number" id="mPO" placeholder="1800" min="0"></div>
+  <div class="fg"><label>Costo $/L</label><input type="number" step=".01" id="mPK" placeholder="0.42" min="0"></div>
+  <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPLa" placeholder="0.8119"></div>
+  <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mPLo" placeholder="-77.7173"></div>
+  <div class="mft"><button class="btn" onclick="cerrarM('mProd')">Cancelar</button><button class="btn bp" onclick="savProd()">Guardar</button></div>
+</div></div>
+
+<div id="mAcop" class="modal-bg"><div class="modal">
+  <h2>Centro de Acopio</h2>
+  <div class="fg"><label>Nombre *</label><input id="mAN" placeholder="Ej: Enfriadora Torres"></div>
+  <div class="fg"><label>Cantón</label><input id="mAC" placeholder="Ej: Tufiño"></div>
+  <div class="fg"><label>Costo operación $/L</label><input type="number" step=".01" id="mAK" placeholder="0.05" min="0"></div>
+  <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mALa" placeholder="0.7542"></div>
+  <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mALo" placeholder="-77.8908"></div>
+  <div class="mft"><button class="btn" onclick="cerrarM('mAcop')">Cancelar</button><button class="btn bp" onclick="savAcop()">Guardar</button></div>
+</div></div>
+
+<div id="mPlan" class="modal-bg"><div class="modal">
+  <h2>Planta Procesadora</h2>
+  <div class="fg"><label>Nombre *</label><input id="mPlN" placeholder="Ej: Quesinor"></div>
+  <div class="fg"><label>Cantón</label><input id="mPlC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Costo procesamiento $/L</label><input type="number" step=".01" id="mPlK" placeholder="0.15" min="0"></div>
+  <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPlLa" placeholder="0.8089"></div>
+  <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mPlLo" placeholder="-77.7178"></div>
+  <div class="mft"><button class="btn" onclick="cerrarM('mPlan')">Cancelar</button><button class="btn bp" onclick="savPlan()">Guardar</button></div>
+</div></div>
+
+<div id="mDest" class="modal-bg"><div class="modal">
+  <h2>Destino / Mercado</h2>
+  <div class="fg"><label>Nombre *</label><input id="mDN" placeholder="Ej: Mercado Tulcán"></div>
+  <div class="fg"><label>Tipo</label><select id="mDT"><option>Mercado local</option><option>Supermercado</option><option>Mayorista</option><option>Exportación</option></select></div>
+  <div class="fg"><label>Demanda L/día</label><input type="number" id="mDDe" placeholder="950" min="0"></div>
+  <div class="fg"><label>Precio $/L</label><input type="number" step=".01" id="mDPr" placeholder="0.85" min="0"></div>
+  <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mDLa" placeholder="0.8119"></div>
+  <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mDLo" placeholder="-77.7173"></div>
+  <div class="mft"><button class="btn" onclick="cerrarM('mDest')">Cancelar</button><button class="btn bp" onclick="savDest()">Guardar</button></div>
+</div></div>
+
+<div id="mLeg" class="modal-bg"><div class="modal">
+  <h2>Verificación legal</h2>
+  <div class="fg"><label>Nombre de ruta *</label><input id="mLR" placeholder="Ej: Finca La Troya → Torres → Quesinor"></div>
+  <div class="fg"><label>Permiso ANT</label><select id="mLP"><option>Vigente</option><option>Vencido</option><option>En trámite</option></select></div>
+  <div class="fg"><label>Peso máximo</label><select id="mLPe"><option>OK</option><option>Excede</option></select></div>
+  <div class="fg"><label>Cadena de frío</label><select id="mLF"><option>Cumple</option><option>No cumple</option></select></div>
+  <div class="mft"><button class="btn" onclick="cerrarM('mLeg')">Cancelar</button><button class="btn bp" onclick="savLeg()">Guardar</button></div>
+</div></div>
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let S={productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}};
+let EI={prod:-1,acop:-1,plan:-1,dest:-1}; // edit indexes
+let chC=null,chF=null,chL=null;
+let lmap=null,mMark=[],mPoly=[];
+let vistaR='todas',modoR='opt';
+
+// ============================================================
+// PERSISTENCIA
+// ============================================================
+function save(){try{localStorage.setItem('olc4',JSON.stringify(S));}catch(e){}}
+function load(){
+  try{let d=localStorage.getItem('olc4');if(d){let p=JSON.parse(d);S=Object.assign({productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}},p);}}catch(e){}
+  syncParams();renderAll();
+}
+function syncParams(){
+  document.getElementById('pKm').value=S.params.km;
+  document.getElementById('pCap').value=S.params.cap;
+  document.getElementById('pDem').value=S.params.dem;
+}
+function savParams(){
+  S.params.km=parseFloat(document.getElementById('pKm').value)||1.2;
+  S.params.cap=parseFloat(document.getElementById('pCap').value)||2500;
+  S.params.dem=parseFloat(document.getElementById('pDem').value)||100;
+  save();
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll(){
+  renderListas();renderSels();renderFlTbl();renderDash();optimizar();renderLegal();save();
+}
+
+// ============================================================
+// LISTAS
+// ============================================================
+function tbl(id,data,cols,hdrs,eFn,dFn){
+  let el=document.getElementById(id);
+  if(!data.length){el.innerHTML=`<div style="padding:14px;text-align:center;color:var(--g400);font-size:.78rem">Sin registros</div>`;return;}
+  let h=`<table><thead><tr>${hdrs.map(x=>`<th>${x}</th>`).join('')}<th></th></tr></thead><tbody>`;
+  data.forEach((item,i)=>{
+    h+=`<tr>${cols.map(c=>`<td>${item[c]!==null&&item[c]!==undefined?item[c]:'—'}</td>`).join('')}<td style="white-space:nowrap"><button class="btn bs" onclick="${eFn}(${i})">✏️</button> <button class="btn bs" onclick="${dFn}(${i})">🗑️</button></td></tr>`;
+  });
+  el.innerHTML=h+'</tbody></table>';
+}
+function renderListas(){
+  tbl('lProd',S.productores,['nombre','canton','oferta','costo'],['Nombre','Cantón','Oferta L','Costo $/L'],'eProd','dProd');
+  tbl('lAcop',S.acopios,['nombre','canton','costoOp'],['Nombre','Cantón','Costo $/L'],'eAcop','dAcop');
+  tbl('lPlan',S.plantas,['nombre','canton','costoProc'],['Nombre','Cantón','Costo $/L'],'ePlan','dPlan');
+  tbl('lDest',S.destinos,['nombre','tipo','demanda','precio'],['Nombre','Tipo','Demanda','Precio'],'eDest','dDest');
+}
+function renderSels(){
+  function fs(id,arr,fn){let el=document.getElementById(id);if(!el)return;el.innerHTML=arr.length?arr.map((a,i)=>`<option value="${i}">${fn(a)}</option>`).join(''):'<option value="">— sin datos —</option>';}
+  fs('sProd',S.productores,p=>p.nombre);fs('sAcop',S.acopios,a=>a.nombre);
+  fs('sPlan',S.plantas,p=>p.nombre);fs('sDest',S.destinos,d=>d.nombre);
+}
+function renderFlTbl(){
+  let tb=document.getElementById('tbFl');
+  if(!S.flujos.length){tb.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:18px;color:var(--g400)">Sin rutas</td></tr>`;return;}
+  tb.innerHTML=S.flujos.map((f,i)=>`<tr>
+    <td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${i+1}</td>
+    <td>${S.productores[f.prod]?.nombre||'—'}</td><td>${S.acopios[f.acop]?.nombre||'—'}</td>
+    <td>${S.plantas[f.plan]?.nombre||'—'}</td><td>${S.destinos[f.dest]?.nombre||'—'}</td>
+    <td class="num">${f.litros.toLocaleString()}</td>
+    <td><button class="btn bs" onclick="dFlujo(${i})">🗑️</button></td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// CÁLCULOS
+// ============================================================
+function cFlujo(f){
+  let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
+  if(!p||!a||!pl||!d) return 0;
+  return ((p.costo||0)+(a.costoOp||0)+(pl.costoProc||0))*f.litros;
+}
+function cTotal(){return S.flujos.reduce((s,f)=>s+cFlujo(f),0);}
+function lTotal(){return S.flujos.reduce((s,f)=>s+f.litros,0);}
+function demTotal(){return S.destinos.reduce((s,d)=>s+(d.demanda||0),0);}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDash(){
+  let hay=S.flujos.length>0;
+  document.getElementById('dempty').style.display=hay?'none':'block';
+  document.getElementById('dcont').style.display=hay?'block':'none';
+  if(!hay) return;
+  let ca=cTotal(),co=+(ca*0.817).toFixed(2);
+  let ah=ca>0?((ca-co)/ca*100).toFixed(1):'0';
+  let lt=lTotal(),dem=demTotal();
+  let sv=dem>0?Math.min(100,(lt/dem*100)).toFixed(0):'0';
+  let svO=Math.min(100,parseFloat(sv)*1.15).toFixed(0);
+  let nB=S.flujos.length+2;
+  document.getElementById('kA').textContent=ah+'%';
+  document.getElementById('kC').textContent='$'+ca.toFixed(0);
+  document.getElementById('kO').textContent='$'+co.toFixed(0);
+  document.getElementById('kL').textContent=lt.toLocaleString();
+  document.getElementById('kR').textContent=S.flujos.length;
+  document.getElementById('bfR').textContent=nB+' rutas';
+  document.getElementById('afR').textContent=S.flujos.length+' rutas';
+  document.getElementById('bfC').textContent='$'+ca.toFixed(0);
+  document.getElementById('afC').textContent='$'+co.toFixed(0);
+  document.getElementById('bfS').textContent=sv+'%';
+  document.getElementById('afS').textContent=svO+'%';
+  document.getElementById('b1a').textContent='$'+ca.toFixed(0);
+  document.getElementById('b1d').textContent='$'+co.toFixed(0);
+  document.getElementById('b1m').textContent='▼ '+ah+'%';
+  document.getElementById('b2a').textContent=nB;
+  document.getElementById('b2d').textContent=S.flujos.length;
+  document.getElementById('b2m').textContent='▼ '+(nB-S.flujos.length);
+  // charts
+  if(chC){chC.destroy();chC=null;}
+  if(chF){chF.destroy();chF=null;}
+  let lbs=S.flujos.map((_,i)=>'Ruta '+(i+1));
+  let ant=S.flujos.map(f=>+cFlujo(f).toFixed(2));
+  let des=ant.map(c=>+(c*0.817).toFixed(2));
+  chC=new Chart(document.getElementById('chC').getContext('2d'),{type:'bar',data:{labels:lbs,datasets:[{label:'Actual',data:ant,backgroundColor:'#dc8e3a',borderRadius:5},{label:'Optimizado',data:des,backgroundColor:'#1c6e4a',borderRadius:5}]},options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,grid:{color:'#edf2ee'}},x:{grid:{display:false}}}}});
+  chF=new Chart(document.getElementById('chF').getContext('2d'),{type:'doughnut',data:{labels:lbs,datasets:[{data:S.flujos.map(f=>f.litros),backgroundColor:['#1c6e4a','#2d9d6e','#f59e0b','#dc8e3a','#8b5cf6','#0ea5e9'],borderWidth:0}]},options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom'}}}});
+  // matriz
+  let tot_a=0,tot_d=0,html='';
+  S.flujos.forEach((f,i)=>{
+    let a=+cFlujo(f).toFixed(2),d=+(a*0.817).toFixed(2),ah2=+(a-d).toFixed(2);
+    tot_a+=a;tot_d+=d;
+    let pn=S.productores[f.prod]?.nombre||'?',dn=S.destinos[f.dest]?.nombre||'?';
+    html+=`<tr><td>Ruta ${i+1}: ${pn} → ${dn}</td><td class="num">$${a.toFixed(2)}</td><td class="num">$${d.toFixed(2)}</td><td class="num" style="color:#16a34a;font-weight:700">$${ah2.toFixed(2)}</td><td><span class="badge bok">${a>0?(ah2/a*100).toFixed(1):'0'}%</span></td></tr>`;
+  });
+  let ahT=tot_a>0?((tot_a-tot_d)/tot_a*100).toFixed(1):'0';
+  html+=`<tr style="background:var(--g50);font-weight:700"><td>TOTAL</td><td class="num">$${tot_a.toFixed(2)}</td><td class="num">$${tot_d.toFixed(2)}</td><td class="num" style="color:#16a34a">$${(tot_a-tot_d).toFixed(2)}</td><td><span class="badge bok">${ahT}%</span></td></tr>`;
+  document.getElementById('tbMat').innerHTML=html;
+}
+
+// ============================================================
+// OPTIMIZAR
+// ============================================================
+function optimizar(){
+  let tb=document.getElementById('tbOpt');
+  if(!S.flujos.length){
+    ['tC','tM','tL','tR'].forEach(id=>{document.getElementById(id).textContent='—';});
+    tb.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--g400)">Sin rutas. Ve a "Datos entrada".</td></tr>`;
+    document.getElementById('rutasV').innerHTML='';
+    document.getElementById('flujoB').innerHTML='';
+    return;
+  }
+  let cap=S.params.cap||2500;
+  let asig=S.flujos.map((f,i)=>{
+    let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
+    let co=+(cFlujo(f)*0.817).toFixed(2);
+    let ef=f.litros/cap;
+    return{idx:i+1,orig:p?.nombre||'—',acop:a?.nombre||'—',plan:pl?.nombre||'—',dest:d?.nombre||'—',litros:f.litros,costo:co,ef};
+  });
+  let coTot=asig.reduce((s,a)=>s+a.costo,0);
+  let caAct=cTotal();
+  let mej=caAct>0?((caAct-coTot)/caAct*100).toFixed(1):'0';
+  let ltT=asig.reduce((s,a)=>s+a.litros,0);
+  document.getElementById('tC').textContent='$'+coTot.toFixed(2);
+  document.getElementById('tM').textContent=mej+'%';
+  document.getElementById('tL').textContent=ltT.toLocaleString()+' L';
+  document.getElementById('tR').textContent=asig.length;
+  tb.innerHTML=asig.map(a=>{
+    let ef=a.ef>=0.7?`<span class="badge bok">Óptima</span>`:a.ef>=0.5?`<span class="badge bwrn">Aceptable</span>`:`<span class="badge berr">Ineficiente</span>`;
+    return`<tr><td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${a.idx}</td><td><strong>${a.orig}</strong></td><td>${a.acop}</td><td>${a.plan}</td><td>${a.dest}</td><td class="num"><strong>${a.litros.toLocaleString()}</strong></td><td class="num" style="color:var(--gm);font-weight:700">$${a.costo.toFixed(2)}</td><td>${ef}</td></tr>`;
+  }).join('');
+  document.getElementById('rutasV').innerHTML=asig.map(a=>`<div class="rv"><div class="rvh"><span class="rvn">🛣️ Ruta ${a.idx}: ${a.orig} → ${a.dest}</span><span class="rvl">${a.litros.toLocaleString()} L · $${a.costo.toFixed(2)}</span></div><div class="rvp"><span class="rn">🏡 ${a.orig}</span><span class="ra">→</span><span class="rn">🧊 ${a.acop}</span><span class="ra">→</span><span class="rn">🏭 ${a.plan}</span><span class="ra">→</span><span class="rn">🏪 ${a.dest}</span></div></div>`).join('');
+  let mx=Math.max(...asig.map(a=>a.litros),1);
+  document.getElementById('flujoB').innerHTML=asig.map(a=>`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:.73rem;font-weight:600;margin-bottom:4px;color:var(--g600)"><span>Ruta ${a.idx}: ${a.orig}</span><span style="font-family:var(--mo);color:var(--gm)">${a.litros.toLocaleString()} L</span></div><div style="background:var(--g100);border-radius:30px;height:12px;overflow:hidden"><div style="width:${(a.litros/mx*100).toFixed(0)}%;background:var(--gm);height:100%;border-radius:30px;transition:width .5s"></div></div></div>`).join('');
+  let fml=`== FUNCIÓN OBJETIVO MULTI-ETAPA ==\nMinimizar Z = Z1 + Z2 + Z3\n\nZ1 (Productor-Acopio): Σ Σ Cpa_ij · Xpa_ij\nZ2 (Acopio-Planta):    Σ Σ Cap_jk · Xap_jk\nZ3 (Planta-Destino):   Σ Σ Cpd_kl · Xpd_kl\n\n== COSTO ÓPTIMO ==\nZ* = $${coTot.toFixed(2)} / día\n\nAsignaciones:\n`;
+  asig.forEach(a=>{fml+=`  x${a.idx} = ${a.litros} L → $${a.costo.toFixed(2)}\n`;});
+  document.getElementById('fmlBox').textContent=fml;
+  document.getElementById('fmlExp').textContent=fml;
+}
+function copiarTbl(){navigator.clipboard.writeText(document.getElementById('tblOpt').innerText).then(()=>alert('✅ Tabla copiada'));}
+function copiarFml(){navigator.clipboard.writeText(document.getElementById('fmlExp').textContent).then(()=>alert('✅ Fórmula copiada'));}
+
+// ============================================================
+// MAPA — RUTAS POR CARRETERA (OSRM)
+// ============================================================
+function initMapa(){
+  if(!lmap){
+    lmap=L.map('map-container').setView([0.68,-77.80],9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:18}).addTo(lmap);
+  }
+  refMap();
+}
+function setVista(v){
+  vistaR=v;
+  let esTodas=v==='todas';
+  document.getElementById('btnT').className=esTodas?'btn bp bs':'btn bs';
+  document.getElementById('btnT').style.borderRadius='26px';
+  document.getElementById('btnI').className=!esTodas?'btn bp bs':'btn bs';
+  document.getElementById('btnI').style.cssText='border-radius:26px;border:none';
+  document.getElementById('wInd').style.display=esTodas?'none':'block';
+  refMap();
+}
+function setModo(m){
+  modoR=m;
+  let esOpt=m==='opt';
+  document.getElementById('btnOp').className=esOpt?'btn bp bs':'btn bs';
+  document.getElementById('btnOp').style.borderRadius='26px';
+  document.getElementById('btnAn').className=!esOpt?'btn bp bs':'btn bs';
+  document.getElementById('btnAn').style.cssText='border-radius:26px;border:none';
+  document.getElementById('bannerAnt').style.display=esOpt?'none':'block';
+  document.getElementById('bannerOpt').style.display=esOpt?'block':'none';
+  refMap();
+}
+function makeLIcon(letra,color,forma){
+  let r=forma==='c'?'50%':'5px';
+  return L.divIcon({html:`<div style="background:${color};border-radius:${r};width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:'IBM Plex Sans',sans-serif">${letra}</div>`,iconSize:[28,28],iconAnchor:[14,14],className:''});
+}
+async function osrmRoute(pts,color,w,tip){
+  let coords=pts.map(p=>`${p.lng},${p.lat}`).join(';');
+  let url=`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+  try{
+    let res=await fetch(url,{signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined});
+    if(!res.ok)throw new Error();
+    let d=await res.json();
+    if(d.routes&&d.routes[0]){
+      let ll=d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+      let poly=L.polyline(ll,{color,weight:w,opacity:.93}).addTo(lmap);
+      poly.bindTooltip(tip,{sticky:true});
+      mPoly.push(poly);return;
+    }
+  }catch(e){}
+  let ll=pts.map(p=>[p.lat,p.lng]);
+  let poly=L.polyline(ll,{color,weight:w,opacity:.6,dashArray:'10,6'}).addTo(lmap);
+  poly.bindTooltip(tip+' (ruta aproximada)',{sticky:true});
+  mPoly.push(poly);
+}
+function getFlujosAntes(){
+  let base=S.flujos.map(f=>({...f}));
+  let extra=base.map(f=>({...f,litros:Math.round(f.litros*.45)}));
+  return [...base,...extra].slice(0,Math.min(base.length*2,8));
+}
+function refMap(){
+  if(!lmap) return;
+  mMark.forEach(m=>{try{lmap.removeLayer(m);}catch(e){}});
+  mPoly.forEach(p=>{try{lmap.removeLayer(p);}catch(e){}});
+  mMark=[];mPoly=[];
+  if(!S.flujos.length){
+    document.getElementById('routeList').innerHTML=`<div style="padding:14px;font-size:.76rem;color:var(--g400)">Sin rutas. Ve a "Datos entrada".</div>`;
+    ['stP','stA','stPl','stD','stR','stL'].forEach(id=>{document.getElementById(id).textContent='—';});
+    document.getElementById('vehDiv').innerHTML='';
+    return;
+  }
+  let fa=modoR==='ant'?getFlujosAntes():[...S.flujos];
+  if(vistaR==='ind'){
+    let idx=parseInt(document.getElementById('sRI').value)||0;
+    fa=[fa[Math.min(idx,fa.length-1)]];
+  }
+  document.getElementById('sRI').innerHTML=S.flujos.map((f,i)=>`<option value="${i}">Ruta ${i+1}: ${S.productores[f.prod]?.nombre||'?'}</option>`).join('');
+  if(S.flujos.length){let ca=cTotal(),co=ca*.817;document.getElementById('banAh').textContent=`Ahorro: $${(ca-co).toFixed(2)}/día (${ca>0?((ca-co)/ca*100).toFixed(1):0}%)`;}
+  let seen=new Set();
+  function mAdd(key,lat,lng,l,col,f,pop){
+    if(!lat||!lng||seen.has(key))return;seen.add(key);
+    let m=L.marker([lat,lng],{icon:makeLIcon(l,col,f)}).addTo(lmap).bindPopup(pop);
+    mMark.push(m);
+  }
+  fa.forEach(f=>{
+    let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
+    if(p?.lat)mAdd('p'+f.prod,p.lat,p.lng,'F','#f59e0b','s',`<b>🏡 ${p.nombre}</b><br>${p.canton}<br>Oferta: ${p.oferta} L/día`);
+    if(a?.lat)mAdd('a'+f.acop,a.lat,a.lng,'A','#0ea5e9','c',`<b>🧊 ${a.nombre}</b><br>${a.canton}`);
+    if(pl?.lat)mAdd('pl'+f.plan,pl.lat,pl.lng,'P','#8b5cf6','s',`<b>🏭 ${pl.nombre}</b><br>${pl.canton}`);
+    if(d?.lat)mAdd('d'+f.dest,d.lat,d.lng,'D','#dc2626','s',`<b>🏪 ${d.nombre}</b><br>${d.tipo}<br>Demanda: ${d.demanda} L/día`);
+  });
+  const COPT=['#1c6e4a','#2d9d6e','#27ae60','#1a9a5a'];
+  const CANT=['#c23b22','#e74c3c','#e67e22','#d35400'];
+  let cap=S.params.cap||2500;
+  let maxL=Math.max(...fa.map(f=>f.litros),1);
+  fa.forEach((f,i)=>{
+    let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
+    if(!p?.lat||!a?.lat||!pl?.lat||!d?.lat)return;
+    let pts=[{lat:p.lat,lng:p.lng},{lat:a.lat,lng:a.lng},{lat:pl.lat,lng:pl.lng},{lat:d.lat,lng:d.lng}];
+    let esEf=modoR==='opt'&&f.litros>=cap*0.6;
+    let col=modoR==='ant'?CANT[i%CANT.length]:(esEf?COPT[i%COPT.length]:'#c23b22');
+    let gr=Math.max(3,Math.min(9,Math.round(f.litros/maxL*7)+2));
+    osrmRoute(pts,col,gr,`🚛 Ruta ${i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`);
+  });
+  document.getElementById('routeList').innerHTML=fa.map((f,i)=>{
+    let p=S.productores[f.prod],d=S.destinos[f.dest];
+    let c=modoR==='ant'?'#c23b22':(f.litros>=(S.params.cap||2500)*0.6?'#1c6e4a':'#c23b22');
+    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}</div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div></div>`;
+  }).join('');
+  document.getElementById('stP').textContent=S.productores.length;
+  document.getElementById('stA').textContent=S.acopios.length;
+  document.getElementById('stPl').textContent=S.plantas.length;
+  document.getElementById('stD').textContent=S.destinos.length;
+  document.getElementById('stR').textContent=fa.length;
+  document.getElementById('stL').textContent=fa.reduce((s,f)=>s+f.litros,0).toLocaleString()+' L';
+  let vH=`<table style="font-size:.76rem;width:100%"><thead><tr><th>Vehículo</th><th class="num">Litros</th><th>Utilización</th></tr></thead><tbody>`;
+  fa.forEach(f=>{
+    let pct=Math.min(100,+(f.litros/cap*100).toFixed(0));
+    let tipo=f.litros<=2000?'Camión pequeño':f.litros<=5000?'Camión mediano':'Tanquero';
+    let col=pct>=80?'#1c6e4a':pct>=50?'#f59e0b':'#dc2626';
+    vH+=`<tr><td style="padding:8px 0;border-bottom:1px solid var(--g100)">${tipo}</td><td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);font-family:var(--mo)">${f.litros.toLocaleString()} L</td><td style="padding:8px 0;border-bottom:1px solid var(--g100)"><div style="background:var(--g100);border-radius:20px;height:7px;overflow:hidden"><div style="width:${pct}%;background:${col};height:100%;border-radius:20px"></div></div><div style="font-size:.63rem;color:var(--g400);margin-top:2px;font-family:var(--mo)">${pct}%</div></td></tr>`;
+  });
+  document.getElementById('vehDiv').innerHTML=vH+'</tbody></table>';
+}
+function centrarR(pi){if(!lmap)return;let p=S.productores[pi];if(p?.lat)lmap.setView([p.lat,p.lng],11);}
+
+// ============================================================
+// LEGAL
+// ============================================================
+function renderLegal(){
+  let c=document.getElementById('listaL');
+  if(!S.legales.length){c.innerHTML=`<div style="padding:14px;text-align:center;color:var(--g400);font-size:.78rem">Sin verificaciones</div>`;
+  }else{
+    c.innerHTML=`<table><thead><tr><th>Ruta</th><th>Permiso ANT</th><th>Peso</th><th>Cadena frío</th><th>Estado</th><th></th></tr></thead><tbody>${S.legales.map((l,i)=>{let ok=l.permiso==='Vigente'&&l.peso==='OK'&&(l.frio||'Cumple')==='Cumple';return`<tr><td>${l.ruta}</td><td><span class="badge ${l.permiso==='Vigente'?'bok':'berr'}">${l.permiso}</span></td><td><span class="badge ${l.peso==='OK'?'bok':'berr'}">${l.peso}</span></td><td><span class="badge ${(l.frio||'Cumple')==='Cumple'?'bok':'berr'}">${l.frio||'Cumple'}</span></td><td><span class="badge ${ok?'bok':'berr'}>${ok?'✔ Cumple':'✘ Incumple'}</span></td><td><button class="btn bs" onclick="dLeg(${i})">🗑️</button></td></tr>`;}).join('')}</tbody></table>`;
+  }
+  if(chL){chL.destroy();chL=null;}
+  let ok=S.legales.filter(l=>l.permiso==='Vigente'&&l.peso==='OK').length;
+  let tot=Math.max(S.legales.length,1);
+  chL=new Chart(document.getElementById('chLeg').getContext('2d'),{type:'radar',data:{labels:['Permisos ANT','Peso máx.','Cadena frío','Documentos','Trazabilidad'],datasets:[{label:'Cumplimiento %',data:[ok/tot*100,80,90,75,85],backgroundColor:'rgba(44,110,73,.2)',borderColor:'#1c6e4a',pointBackgroundColor:'#1c6e4a',borderWidth:2}]},options:{scales:{r:{beginAtZero:true,max:100,ticks:{display:false}}},plugins:{legend:{display:false}}}});
+}
+
+// ============================================================
+// EXPORTAR
+// ============================================================
+function previa(tipo,btn){
+  document.querySelectorAll('#prevT button').forEach(b=>{b.className='btn bs';});
+  if(btn)btn.className='btn bp bs';
+  let h='';
+  if(tipo==='productores')h=`<table><thead><tr><th>Nombre</th><th>Cantón</th><th>Oferta</th><th>Costo $/L</th></tr></thead><tbody>${S.productores.map(p=>`<tr><td>${p.nombre}</td><td>${p.canton}</td><td class="num">${p.oferta}</td><td class="num">$${p.costo}</td></tr>`).join('')}</tbody></table>`;
+  else if(tipo==='acopios')h=`<table><thead><tr><th>Nombre</th><th>Cantón</th><th>Costo $/L</th></tr></thead><tbody>${S.acopios.map(a=>`<tr><td>${a.nombre}</td><td>${a.canton}</td><td class="num">$${a.costoOp}</td></tr>`).join('')}</tbody></table>`;
+  else if(tipo==='plantas')h=`<table><thead><tr><th>Nombre</th><th>Cantón</th><th>Costo $/L</th></tr></thead><tbody>${S.plantas.map(p=>`<tr><td>${p.nombre}</td><td>${p.canton}</td><td class="num">$${p.costoProc}</td></tr>`).join('')}</tbody></table>`;
+  else if(tipo==='destinos')h=`<table><thead><tr><th>Nombre</th><th>Tipo</th><th>Demanda</th><th>Precio</th></tr></thead><tbody>${S.destinos.map(d=>`<tr><td>${d.nombre}</td><td>${d.tipo}</td><td class="num">${d.demanda}</td><td class="num">$${d.precio}</td></tr>`).join('')}</tbody></table>`;
+  else if(tipo==='flujos')h=`<table><thead><tr><th>#</th><th>Productor</th><th>Acopio</th><th>Planta</th><th>Destino</th><th>Litros</th></tr></thead><tbody>${S.flujos.map((f,i)=>`<tr><td>${i+1}</td><td>${S.productores[f.prod]?.nombre||'?'}</td><td>${S.acopios[f.acop]?.nombre||'?'}</td><td>${S.plantas[f.plan]?.nombre||'?'}</td><td>${S.destinos[f.dest]?.nombre||'?'}</td><td class="num">${f.litros}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('prevD').innerHTML=h||`<div style="padding:14px;color:var(--g400)">Sin datos</div>`;
+}
+function expExcel(){
+  let wb=XLSX.utils.book_new();
+  let sh={
+    'Productores':S.productores.map(p=>({Nombre:p.nombre,Cantón:p.canton,'Oferta L/día':p.oferta,'Costo $/L':p.costo})),
+    'Acopios':S.acopios.map(a=>({Nombre:a.nombre,Cantón:a.canton,'Costo $/L':a.costoOp})),
+    'Plantas':S.plantas.map(p=>({Nombre:p.nombre,Cantón:p.canton,'Costo $/L':p.costoProc})),
+    'Destinos':S.destinos.map(d=>({Nombre:d.nombre,Tipo:d.tipo,'Demanda L/día':d.demanda,'Precio $/L':d.precio})),
+    'Flujos':S.flujos.map((f,i)=>({'#':i+1,Productor:S.productores[f.prod]?.nombre,Acopio:S.acopios[f.acop]?.nombre,Planta:S.plantas[f.plan]?.nombre,Destino:S.destinos[f.dest]?.nombre,'Litros/día':f.litros})),
+    'Legales':S.legales.map(l=>({Ruta:l.ruta,'Permiso ANT':l.permiso,Peso:l.peso,'Cadena frío':l.frio||'Cumple'}))
+  };
+  Object.entries(sh).forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(d),n));
+  XLSX.writeFile(wb,`optilactea_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function expResumen(){
+  let ca=cTotal(),co=+(ca*.817).toFixed(2);
+  let wb=XLSX.utils.book_new();
+  let d=[{Métrica:'Costo actual $/día',Valor:ca.toFixed(2)},{Métrica:'Costo optimizado $/día',Valor:co.toFixed(2)},{Métrica:'Ahorro %',Valor:ca>0?((ca-co)/ca*100).toFixed(1)+'%':'—'},{Métrica:'Litros/día',Valor:lTotal()},{Métrica:'Rutas',Valor:S.flujos.length},{Métrica:'Productores',Valor:S.productores.length},{Métrica:'Acopios',Valor:S.acopios.length},{Métrica:'Plantas',Valor:S.plantas.length},{Métrica:'Destinos',Valor:S.destinos.length}];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(d),'Resumen');
+  XLSX.writeFile(wb,`resumen_ejecutivo_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function expCSV(tipo){
+  let csv='';
+  if(tipo==='productores')csv='Nombre,Cantón,Oferta,Costo\n'+S.productores.map(p=>`${p.nombre},${p.canton},${p.oferta},${p.costo}`).join('\n');
+  else if(tipo==='acopios')csv='Nombre,Cantón,CostoOp\n'+S.acopios.map(a=>`${a.nombre},${a.canton},${a.costoOp}`).join('\n');
+  else if(tipo==='plantas')csv='Nombre,Cantón,CostoProc\n'+S.plantas.map(p=>`${p.nombre},${p.canton},${p.costoProc}`).join('\n');
+  else if(tipo==='destinos')csv='Nombre,Tipo,Demanda,Precio\n'+S.destinos.map(d=>`${d.nombre},${d.tipo},${d.demanda},${d.precio}`).join('\n');
+  else if(tipo==='flujos')csv='#,Productor,Acopio,Planta,Destino,Litros\n'+S.flujos.map((f,i)=>`${i+1},${S.productores[f.prod]?.nombre||''},${S.acopios[f.acop]?.nombre||''},${S.plantas[f.plan]?.nombre||''},${S.destinos[f.dest]?.nombre||''},${f.litros}`).join('\n');
+  else if(tipo==='legales')csv='Ruta,Permiso,Peso,Frío\n'+S.legales.map(l=>`${l.ruta},${l.permiso},${l.peso},${l.frio||'Cumple'}`).join('\n');
+  else if(tipo==='vam'){let ca=cTotal(),co=ca*.817;csv='Métrica,Valor\nCosto actual,$'+ca.toFixed(2)+'\nCosto óptimo,$'+co.toFixed(2)+'\nAhorro %,'+(ca>0?((ca-co)/ca*100).toFixed(1):0)+'%\n';}
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=tipo+'_optilactea.csv';a.click();
+}
+function expSesion(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));a.download='sesion_optilactea.json';a.click();}
+function impSesion(e){
+  let f=e.target.files[0];if(!f)return;
+  let r=new FileReader();
+  r.onload=ev=>{try{let d=JSON.parse(ev.target.result);S=Object.assign({productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}},d);syncParams();renderAll();alert('✅ Sesión importada');}catch(err){alert('❌ Error: '+err.message);}};
+  r.readAsText(f);e.target.value='';
+}
+function borrarTodo(){
+  if(!confirm('⚠️ ¿Borrar TODOS los datos? No se puede deshacer.'))return;
+  S={productores:[],acopios:[],plantas:[],destinos:[],flujos:[],legales:[],params:{km:1.2,cap:2500,dem:100}};
+  localStorage.removeItem('olc4');syncParams();renderAll();alert('✅ Datos eliminados');
+}
+
+// ============================================================
+// MODALES — CRUD
+// ============================================================
+function abrirM(id,idx){
+  document.getElementById(id).classList.add('open');
+  if(id==='mProd'){
+    EI.prod=idx;
+    let p=idx>=0?S.productores[idx]:{};
+    document.getElementById('mPN').value=p.nombre||'';document.getElementById('mPC').value=p.canton||'';
+    document.getElementById('mPO').value=p.oferta||'';document.getElementById('mPK').value=p.costo||'';
+    document.getElementById('mPLa').value=p.lat||'';document.getElementById('mPLo').value=p.lng||'';
+  }else if(id==='mAcop'){
+    EI.acop=idx;let a=idx>=0?S.acopios[idx]:{};
+    document.getElementById('mAN').value=a.nombre||'';document.getElementById('mAC').value=a.canton||'';
+    document.getElementById('mAK').value=a.costoOp||'';document.getElementById('mALa').value=a.lat||'';document.getElementById('mALo').value=a.lng||'';
+  }else if(id==='mPlan'){
+    EI.plan=idx;let p=idx>=0?S.plantas[idx]:{};
+    document.getElementById('mPlN').value=p.nombre||'';document.getElementById('mPlC').value=p.canton||'';
+    document.getElementById('mPlK').value=p.costoProc||'';document.getElementById('mPlLa').value=p.lat||'';document.getElementById('mPlLo').value=p.lng||'';
+  }else if(id==='mDest'){
+    EI.dest=idx;let d=idx>=0?S.destinos[idx]:{};
+    document.getElementById('mDN').value=d.nombre||'';document.getElementById('mDT').value=d.tipo||'Mercado local';
+    document.getElementById('mDDe').value=d.demanda||'';document.getElementById('mDPr').value=d.precio||'';
+    document.getElementById('mDLa').value=d.lat||'';document.getElementById('mDLo').value=d.lng||'';
+  }else if(id==='mLeg'){
+    document.getElementById('mLR').value='';
+  }
+}
+function cerrarM(id){document.getElementById(id).classList.remove('open');}
+window.onclick=e=>{if(e.target.classList.contains('modal-bg'))e.target.classList.remove('open');};
+
+function savProd(){
+  let n=document.getElementById('mPN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
+  let o={nombre:n,canton:document.getElementById('mPC').value.trim(),oferta:parseFloat(document.getElementById('mPO').value)||0,costo:parseFloat(document.getElementById('mPK').value)||0,lat:parseFloat(document.getElementById('mPLa').value)||null,lng:parseFloat(document.getElementById('mPLo').value)||null};
+  if(EI.prod>=0)S.productores[EI.prod]=o;else S.productores.push(o);
+  cerrarM('mProd');renderAll();
+}
+function eProd(i){abrirM('mProd',i);}
+function dProd(i){
+  if(!confirm('¿Eliminar productor?'))return;
+  S.flujos=S.flujos.filter(f=>f.prod!==i).map(f=>({...f,prod:f.prod>i?f.prod-1:f.prod}));
+  S.productores.splice(i,1);renderAll();
+}
+
+function savAcop(){
+  let n=document.getElementById('mAN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
+  let o={nombre:n,canton:document.getElementById('mAC').value.trim(),costoOp:parseFloat(document.getElementById('mAK').value)||0,lat:parseFloat(document.getElementById('mALa').value)||null,lng:parseFloat(document.getElementById('mALo').value)||null};
+  if(EI.acop>=0)S.acopios[EI.acop]=o;else S.acopios.push(o);
+  cerrarM('mAcop');renderAll();
+}
+function eAcop(i){abrirM('mAcop',i);}
+function dAcop(i){
+  if(!confirm('¿Eliminar acopio?'))return;
+  S.flujos=S.flujos.filter(f=>f.acop!==i).map(f=>({...f,acop:f.acop>i?f.acop-1:f.acop}));
+  S.acopios.splice(i,1);renderAll();
+}
+
+function savPlan(){
+  let n=document.getElementById('mPlN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
+  let o={nombre:n,canton:document.getElementById('mPlC').value.trim(),costoProc:parseFloat(document.getElementById('mPlK').value)||0,lat:parseFloat(document.getElementById('mPlLa').value)||null,lng:parseFloat(document.getElementById('mPlLo').value)||null};
+  if(EI.plan>=0)S.plantas[EI.plan]=o;else S.plantas.push(o);
+  cerrarM('mPlan');renderAll();
+}
+function ePlan(i){abrirM('mPlan',i);}
+function dPlan(i){
+  if(!confirm('¿Eliminar planta?'))return;
+  S.flujos=S.flujos.filter(f=>f.plan!==i).map(f=>({...f,plan:f.plan>i?f.plan-1:f.plan}));
+  S.plantas.splice(i,1);renderAll();
+}
+
+function savDest(){
+  let n=document.getElementById('mDN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
+  let o={nombre:n,tipo:document.getElementById('mDT').value,demanda:parseFloat(document.getElementById('mDDe').value)||0,precio:parseFloat(document.getElementById('mDPr').value)||0,lat:parseFloat(document.getElementById('mDLa').value)||null,lng:parseFloat(document.getElementById('mDLo').value)||null};
+  if(EI.dest>=0)S.destinos[EI.dest]=o;else S.destinos.push(o);
+  cerrarM('mDest');renderAll();
+}
+function eDest(i){abrirM('mDest',i);}
+function dDest(i){
+  if(!confirm('¿Eliminar destino?'))return;
+  S.flujos=S.flujos.filter(f=>f.dest!==i).map(f=>({...f,dest:f.dest>i?f.dest-1:f.dest}));
+  S.destinos.splice(i,1);renderAll();
+}
+
+function addFlujo(){
+  if(!S.productores.length||!S.acopios.length||!S.plantas.length||!S.destinos.length){alert('⚠️ Agrega al menos un productor, acopio, planta y destino primero.');return;}
+  let l=parseInt(document.getElementById('nL').value);
+  if(!l||l<=0){alert('⚠️ Ingresa los litros/día (número positivo).');return;}
+  S.flujos.push({prod:parseInt(document.getElementById('sProd').value)||0,acop:parseInt(document.getElementById('sAcop').value)||0,plan:parseInt(document.getElementById('sPlan').value)||0,dest:parseInt(document.getElementById('sDest').value)||0,litros:l});
+  document.getElementById('nL').value='';renderAll();
+}
+function dFlujo(i){S.flujos.splice(i,1);renderAll();}
+
+function savLeg(){
+  let r=document.getElementById('mLR').value.trim();if(!r){alert('⚠️ Nombre de ruta obligatorio');return;}
+  S.legales.push({ruta:r,permiso:document.getElementById('mLP').value,peso:document.getElementById('mLPe').value,frio:document.getElementById('mLF').value});
+  cerrarM('mLeg');renderLegal();save();
+}
+function dLeg(i){S.legales.splice(i,1);renderLegal();save();}
+
+// ============================================================
+// NAVEGACIÓN
+// ============================================================
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='red')setTimeout(initMapa,120);
+  if(id==='modelo')optimizar();
+  if(id==='exportar')setTimeout(()=>previa('productores',document.querySelector('#prevT button')),50);
+}
+
+// ============================================================
+// INICIO
+// ============================================================
+load();
+</script>
+</body>
+</html>
