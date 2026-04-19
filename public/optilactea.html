@@ -377,6 +377,7 @@ Variables:
   <h2>Productor / Finca</h2>
   <div class="fg"><label>Nombre *</label><input id="mPN" placeholder="Ej: Finca La Troya"></div>
   <div class="fg"><label>Cantón</label><input id="mPC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Parroquia</label><input id="mPP" placeholder="Ej: Julio Andrade"></div>
   <div class="fg"><label>Oferta L/día</label><input type="number" id="mPO" placeholder="1800" min="0"></div>
   <div class="fg"><label>Costo $/L</label><input type="number" step=".01" id="mPK" placeholder="0.42" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPLa" placeholder="0.8119"></div>
@@ -388,6 +389,7 @@ Variables:
   <h2>Centro de Acopio</h2>
   <div class="fg"><label>Nombre *</label><input id="mAN" placeholder="Ej: Enfriadora Torres"></div>
   <div class="fg"><label>Cantón</label><input id="mAC" placeholder="Ej: Tufiño"></div>
+  <div class="fg"><label>Parroquia</label><input id="mAP" placeholder="Ej: Maldonado"></div>
   <div class="fg"><label>Costo operación $/L</label><input type="number" step=".01" id="mAK" placeholder="0.05" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mALa" placeholder="0.7542"></div>
   <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mALo" placeholder="-77.8908"></div>
@@ -398,6 +400,7 @@ Variables:
   <h2>Planta Procesadora</h2>
   <div class="fg"><label>Nombre *</label><input id="mPlN" placeholder="Ej: Quesinor"></div>
   <div class="fg"><label>Cantón</label><input id="mPlC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Parroquia</label><input id="mPlP" placeholder="Ej: El Carmelo"></div>
   <div class="fg"><label>Costo procesamiento $/L</label><input type="number" step=".01" id="mPlK" placeholder="0.15" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPlLa" placeholder="0.8089"></div>
   <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mPlLo" placeholder="-77.7178"></div>
@@ -474,9 +477,9 @@ function tbl(id,data,cols,hdrs,eFn,dFn){
   el.innerHTML=h+'</tbody></table>';
 }
 function renderListas(){
-  tbl('lProd',S.productores,['nombre','canton','oferta','costo'],['Nombre','Cantón','Oferta L','Costo $/L'],'eProd','dProd');
-  tbl('lAcop',S.acopios,['nombre','canton','costoOp'],['Nombre','Cantón','Costo $/L'],'eAcop','dAcop');
-  tbl('lPlan',S.plantas,['nombre','canton','costoProc'],['Nombre','Cantón','Costo $/L'],'ePlan','dPlan');
+  tbl('lProd',S.productores,['nombre','canton','parroquia','oferta','costo'],['Nombre','Cantón','Parroquia','Oferta L','Costo $/L'],'eProd','dProd');
+  tbl('lAcop',S.acopios,['nombre','canton','parroquia','costoOp'],['Nombre','Cantón','Parroquia','Costo $/L'],'eAcop','dAcop');
+  tbl('lPlan',S.plantas,['nombre','canton','parroquia','costoProc'],['Nombre','Cantón','Parroquia','Costo $/L'],'ePlan','dPlan');
   tbl('lDest',S.destinos,['nombre','tipo','demanda','precio'],['Nombre','Tipo','Demanda','Precio'],'eDest','dDest');
 }
 function renderSels(){
@@ -612,6 +615,18 @@ function initMapa(){
   }
   refMap();
 }
+// Colores persistentes por ruta (para vista "todas las rutas")
+const BASE_ROUTE_COLS=['#1c6e4a','#2d9d6e','#0ea5e9','#8b5cf6','#f59e0b','#dc8e3a','#10b981','#06b6d4','#a855f7','#f97316','#22c55e'];
+function ensureRouteColors(){
+  if(!Array.isArray(S.flujos))return;
+  S.flujos.forEach((f,i)=>{if(!f.col)f.col=BASE_ROUTE_COLS[i%BASE_ROUTE_COLS.length];});
+}
+function getBaseColorFor(f){
+  ensureRouteColors();
+  let idx=S.flujos.findIndex(r=>r.prod===f.prod&&r.acop===f.acop&&r.plan===f.plan&&r.dest===f.dest);
+  if(idx<0)idx=0;
+  return (S.flujos[idx]&&S.flujos[idx].col)||BASE_ROUTE_COLS[0];
+}
 function setVista(v){
   vistaR=v;
   let esTodas=v==='todas';
@@ -648,7 +663,20 @@ async function osrmRoute(pts,color,w,tip){
       let ll=d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
       let poly=L.polyline(ll,{color,weight:w,opacity:.93}).addTo(lmap);
       poly.bindTooltip(tip,{sticky:true});
-      mPoly.push(poly);return;
+      mPoly.push(poly);
+      // Conector inicial desde el productor hasta el inicio de la ruta (evita espacios)
+      try{
+        if(ll && ll.length>0 && pts && pts.length>0){
+          const sp=L.latLng(pts[0].lat,pts[0].lng);
+          const rp=L.latLng(ll[0][0],ll[0][1]);
+          const dist=sp.distanceTo(rp); // en metros
+          if(isFinite(dist) && dist>25){
+            let pre=L.polyline([[sp.lat,sp.lng],[rp.lat,rp.lng]],{color,weight:Math.max(2,w-1),opacity:.93}).addTo(lmap);
+            mPoly.push(pre);
+          }
+        }
+      }catch(_e){}
+      return;
     }
   }catch(e){}
   // fallback
@@ -664,6 +692,7 @@ function getFlujosAntes(){
 }
 function refMap(){
   if(!lmap) return;
+  ensureRouteColors();
   mMark.forEach(m=>{try{lmap.removeLayer(m);}catch(e){}});
   mPoly.forEach(p=>{try{lmap.removeLayer(p);}catch(e){}});
   mMark=[];mPoly=[];
@@ -705,9 +734,8 @@ function refMap(){
     let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
     if(!p?.lat||!a?.lat||!pl?.lat||!d?.lat)return;
     let pts=[{lat:p.lat,lng:p.lng},{lat:a.lat,lng:a.lng},{lat:pl.lat,lng:pl.lng},{lat:d.lat,lng:d.lng}];
-    // VERDE = óptima (alto volumen), ROJO = ineficiente
-    let esEf=modoR==='opt'&&f.litros>=cap*0.6;
-    let col=modoR==='ant'?CANT[i%CANT.length]:(esEf?COPT[i%COPT.length]:'#c23b22');
+    // Vista individual: optimizado => verde, sin optimizar => rojo. En "todas": color asignado a la ruta.
+    let col=(vistaR==='ind')?(modoR==='opt'?'#16a34a':'#dc2626'):getBaseColorFor(f);
     // Grosor proporcional al volumen
     let gr=Math.max(3,Math.min(9,Math.round(f.litros/maxL*7)+2));
     osrmRoute(pts,col,gr,`🚛 Ruta ${i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`);
@@ -715,8 +743,9 @@ function refMap(){
   // panel rutas
   document.getElementById('routeList').innerHTML=fa.map((f,i)=>{
     let p=S.productores[f.prod],d=S.destinos[f.dest];
-    let c=modoR==='ant'?'#c23b22':(f.litros>=(S.params.cap||2500)*0.6?'#1c6e4a':'#c23b22');
-    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}</div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div></div>`;
+    let c=(vistaR==='ind')?(modoR==='opt'?'#16a34a':'#dc2626'):getBaseColorFor(f);
+    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}
+    </div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div></div>`;
   }).join('');
   // estadísticas
   document.getElementById('stP').textContent=S.productores.length;
@@ -820,16 +849,16 @@ function abrirM(id,idx){
   if(id==='mProd'){
     EI.prod=idx;
     let p=idx>=0?S.productores[idx]:{};
-    document.getElementById('mPN').value=p.nombre||'';document.getElementById('mPC').value=p.canton||'';
+    document.getElementById('mPN').value=p.nombre||'';document.getElementById('mPC').value=p.canton||'';document.getElementById('mPP').value=p.parroquia||'';
     document.getElementById('mPO').value=p.oferta||'';document.getElementById('mPK').value=p.costo||'';
     document.getElementById('mPLa').value=p.lat||'';document.getElementById('mPLo').value=p.lng||'';
   }else if(id==='mAcop'){
     EI.acop=idx;let a=idx>=0?S.acopios[idx]:{};
-    document.getElementById('mAN').value=a.nombre||'';document.getElementById('mAC').value=a.canton||'';
+    document.getElementById('mAN').value=a.nombre||'';document.getElementById('mAC').value=a.canton||'';document.getElementById('mAP').value=a.parroquia||'';
     document.getElementById('mAK').value=a.costoOp||'';document.getElementById('mALa').value=a.lat||'';document.getElementById('mALo').value=a.lng||'';
   }else if(id==='mPlan'){
     EI.plan=idx;let p=idx>=0?S.plantas[idx]:{};
-    document.getElementById('mPlN').value=p.nombre||'';document.getElementById('mPlC').value=p.canton||'';
+    document.getElementById('mPlN').value=p.nombre||'';document.getElementById('mPlC').value=p.canton||'';document.getElementById('mPlP').value=p.parroquia||'';
     document.getElementById('mPlK').value=p.costoProc||'';document.getElementById('mPlLa').value=p.lat||'';document.getElementById('mPlLo').value=p.lng||'';
   }else if(id==='mDest'){
     EI.dest=idx;let d=idx>=0?S.destinos[idx]:{};
@@ -845,7 +874,7 @@ window.onclick=e=>{if(e.target.classList.contains('modal-bg'))e.target.classList
 
 function savProd(){
   let n=document.getElementById('mPN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mPC').value.trim(),oferta:parseFloat(document.getElementById('mPO').value)||0,costo:parseFloat(document.getElementById('mPK').value)||0,lat:parseFloat(document.getElementById('mPLa').value)||null,lng:parseFloat(document.getElementById('mPLo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mPC').value.trim(),parroquia:document.getElementById('mPP').value.trim(),oferta:parseFloat(document.getElementById('mPO').value)||0,costo:parseFloat(document.getElementById('mPK').value)||0,lat:parseFloat(document.getElementById('mPLa').value)||null,lng:parseFloat(document.getElementById('mPLo').value)||null};
   if(EI.prod>=0)S.productores[EI.prod]=o;else S.productores.push(o);
   cerrarM('mProd');renderAll();
 }
@@ -858,7 +887,7 @@ function dProd(i){
 
 function savAcop(){
   let n=document.getElementById('mAN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mAC').value.trim(),costoOp:parseFloat(document.getElementById('mAK').value)||0,lat:parseFloat(document.getElementById('mALa').value)||null,lng:parseFloat(document.getElementById('mALo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mAC').value.trim(),parroquia:document.getElementById('mAP').value.trim(),costoOp:parseFloat(document.getElementById('mAK').value)||0,lat:parseFloat(document.getElementById('mALa').value)||null,lng:parseFloat(document.getElementById('mALo').value)||null};
   if(EI.acop>=0)S.acopios[EI.acop]=o;else S.acopios.push(o);
   cerrarM('mAcop');renderAll();
 }
@@ -871,7 +900,7 @@ function dAcop(i){
 
 function savPlan(){
   let n=document.getElementById('mPlN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mPlC').value.trim(),costoProc:parseFloat(document.getElementById('mPlK').value)||0,lat:parseFloat(document.getElementById('mPlLa').value)||null,lng:parseFloat(document.getElementById('mPlLo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mPlC').value.trim(),parroquia:document.getElementById('mPlP').value.trim(),costoProc:parseFloat(document.getElementById('mPlK').value)||0,lat:parseFloat(document.getElementById('mPlLa').value)||null,lng:parseFloat(document.getElementById('mPlLo').value)||null};
   if(EI.plan>=0)S.plantas[EI.plan]=o;else S.plantas.push(o);
   cerrarM('mPlan');renderAll();
 }

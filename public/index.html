@@ -238,7 +238,7 @@ label{font-size:.68rem;font-weight:700;color:var(--gm);display:block;margin-bott
         <button class="btn bs" onclick="copiarTbl()">📋 Copiar</button>
       </div>
     </div>
-    <div class="tbl"><table id="tblOpt"><thead><tr><th>#</th><th>Origen (Finca)</th><th>Centro Acopio</th><th>Planta</th><th>Destino</th><th class="num">Litros/día</th><th class="num">Costo ($)</th><th>🚛 Vehículo Asignado</th></tr></thead><tbody id="tbOpt"><tr><td colspan="8" style="text-align:center;padding:28px;color:var(--g400)">Presiona "Optimizar"</td></tr></tbody></table></div>
+    <div class="tbl"><table id="tblOpt"><thead><tr><th>#</th><th>Origen (Finca)</th><th>Centro Acopio</th><th>Planta</th><th>Destino</th><th class="num">Litros/día</th><th class="num">Distancia (km)</th><th class="num">Costo ($)</th><th>🚛 Vehículo Asignado</th></tr></thead><tbody id="tbOpt"><tr><td colspan="9" style="text-align:center;padding:28px;color:var(--g400)">Presiona "Optimizar"</td></tr></tbody></table></div>
   </div>
   <div class="card">
     <div class="ct">🧭 RUTAS SELECCIONADAS</div>
@@ -381,6 +381,7 @@ Variables:
   <h2>Productor / Finca</h2>
   <div class="fg"><label>Nombre *</label><input id="mPN" placeholder="Ej: Finca La Troya"></div>
   <div class="fg"><label>Cantón</label><input id="mPC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Parroquia</label><input id="mPP" placeholder="Ej: Julio Andrade"></div>
   <div class="fg"><label>Oferta L/día</label><input type="number" id="mPO" placeholder="1800" min="0"></div>
   <div class="fg"><label>Costo $/L</label><input type="number" step=".01" id="mPK" placeholder="0.42" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPLa" placeholder="0.8119"></div>
@@ -392,6 +393,7 @@ Variables:
   <h2>Centro de Acopio</h2>
   <div class="fg"><label>Nombre *</label><input id="mAN" placeholder="Ej: Enfriadora Torres"></div>
   <div class="fg"><label>Cantón</label><input id="mAC" placeholder="Ej: Tufiño"></div>
+  <div class="fg"><label>Parroquia</label><input id="mAP" placeholder="Ej: Maldonado"></div>
   <div class="fg"><label>Costo operación $/L</label><input type="number" step=".01" id="mAK" placeholder="0.05" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mALa" placeholder="0.7542"></div>
   <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mALo" placeholder="-77.8908"></div>
@@ -402,6 +404,7 @@ Variables:
   <h2>Planta Procesadora</h2>
   <div class="fg"><label>Nombre *</label><input id="mPlN" placeholder="Ej: Quesinor"></div>
   <div class="fg"><label>Cantón</label><input id="mPlC" placeholder="Ej: Tulcán"></div>
+  <div class="fg"><label>Parroquia</label><input id="mPlP" placeholder="Ej: El Carmelo"></div>
   <div class="fg"><label>Costo procesamiento $/L</label><input type="number" step=".01" id="mPlK" placeholder="0.15" min="0"></div>
   <div class="fg"><label>Latitud (para mapa)</label><input type="number" step=".0001" id="mPlLa" placeholder="0.8089"></div>
   <div class="fg"><label>Longitud (para mapa)</label><input type="number" step=".0001" id="mPlLo" placeholder="-77.7178"></div>
@@ -422,8 +425,9 @@ Variables:
 <div id="mVeh" class="modal-bg"><div class="modal">
   <h2>Tipo de camión</h2>
   <div class="fg"><label>Placa del vehículo *</label><input id="mVN" placeholder="Ej: ABC-1234"></div>
-  <div class="fg"><label>Tipo</label><select id="mVT"><option>Camión pequeño</option><option>Camión mediano</option><option>Camión grande</option><option>Tanquero</option></select></div>
-  <div class="fg"><label>Capacidad L</label><input type="number" id="mVC" placeholder="2500" min="0"></div>
+  <div class="fg"><label>Tipo</label><select id="mVT"><option>Camión pequeño</option><option>Camión mediano</option><option>Camión grande</option><option>Camioneta adaptada con tanque</option></select></div>
+  <div class="fg"><label>Capacidad mínima L</label><input type="number" id="mVCmin" placeholder="1000" min="0"></div>
+  <div class="fg"><label>Capacidad máxima L</label><input type="number" id="mVCmax" placeholder="2500" min="0"></div>
   <div class="fg"><label>Costo $/km</label><input type="number" step="0.01" id="mVK" placeholder="0.85" min="0"></div>
   <div class="fg"><label>Fecha vencimiento permiso ANT</label><input type="date" id="mVFec" placeholder="YYYY-MM-DD"></div>
   <div class="fg"><label>Cadena de frío</label><select id="mVFrio"><option value="funciona">✅ Si funciona</option><option value="nofunciona">❌ No funciona</option></select></div>
@@ -504,9 +508,9 @@ function tbl(id,data,cols,hdrs,eFn,dFn){
   el.innerHTML=h+'</tbody></table>';
 }
 function renderListas(){
-  tbl('lProd',S.productores,['nombre','canton','oferta','costo'],['Nombre','Cantón','Oferta L','Costo $/L'],'eProd','dProd');
-  tbl('lAcop',S.acopios,['nombre','canton','costoOp'],['Nombre','Cantón','Costo $/L'],'eAcop','dAcop');
-  tbl('lPlan',S.plantas,['nombre','canton','costoProc'],['Nombre','Cantón','Costo $/L'],'ePlan','dPlan');
+  tbl('lProd',S.productores,['nombre','canton','parroquia','oferta','costo'],['Nombre','Cantón','Parroquia','Oferta L','Costo $/L'],'eProd','dProd');
+  tbl('lAcop',S.acopios,['nombre','canton','parroquia','costoOp'],['Nombre','Cantón','Parroquia','Costo $/L'],'eAcop','dAcop');
+  tbl('lPlan',S.plantas,['nombre','canton','parroquia','costoProc'],['Nombre','Cantón','Parroquia','Costo $/L'],'ePlan','dPlan');
   tbl('lDest',S.destinos,['nombre','tipo','demanda','precio'],['Nombre','Tipo','Demanda','Precio'],'eDest','dDest');
   renderVehiculos();
 }
@@ -515,6 +519,9 @@ function renderVehiculos(){
   if(!S.vehiculos.length){el.innerHTML=`<div style="padding:14px;text-align:center;color:var(--g400);font-size:.78rem">Sin registros</div>`;return;}
   let h=`<table><thead><tr><th>Placa</th><th>Tipo</th><th>Capacidad L</th><th>Costo $/km</th><th>Permiso ANT</th><th>Cadena Frío</th><th></th></tr></thead><tbody>`;
   S.vehiculos.forEach((v,i)=>{
+    let capMin = (v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : 0));
+    let capMax = (v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0));
+    let capLabel = capMin && capMax ? (capMin === capMax ? capMax : `${capMin} - ${capMax}`) : '—';
     let fechaText='—';let badgePermisoClass='berr';
     if(v.fechaVencimiento){
       let fechaVenc=new Date(v.fechaVencimiento);
@@ -531,7 +538,7 @@ function renderVehiculos(){
     }
     let estadoFrioText=v.estadoFrio==='funciona'?'✅ Funciona':'❌ No funciona';
     let badgeFrioClass=v.estadoFrio==='funciona'?'bok':'berr';
-    h+=`<tr><td><strong>${v.nombre}</strong></td><td>${v.tipo}</td><td class="num">${v.capacidad}</td><td class="num">$${v.costoKm}</td><td><span class="badge ${badgePermisoClass}">${fechaText}</span></td><td><span class="badge ${badgeFrioClass}">${estadoFrioText}</span></td><td style="white-space:nowrap"><button class="btn bs" onclick="eVeh(${i})">✏️</button> <button class="btn bs" onclick="dVeh(${i})">🗑️</button></td></tr>`;
+    h+=`<tr><td><strong>${v.nombre}</strong></td><td>${v.tipo}</td><td class="num">${capLabel}</td><td class="num">$${v.costoKm}</td><td><span class="badge ${badgePermisoClass}">${fechaText}</span></td><td><span class="badge ${badgeFrioClass}">${estadoFrioText}</span></td><td style="white-space:nowrap"><button class="btn bs" onclick="eVeh(${i})">✏️</button> <button class="btn bs" onclick="dVeh(${i})">🗑️</button></td></tr>`;
   });
   el.innerHTML=h+'</tbody></table>';
 }
@@ -628,33 +635,43 @@ function optimizar(){
     document.getElementById('flujoB').innerHTML='';
     return;
   }
-  let cap=S.params.cap||2500;
-  let asig=S.flujos.map((f,i)=>{
+  // Construir flujos óptimos por distancia y calcular costos por km
+  S.flujosOpt=computeOptimizedFlows();
+  const costoKm = S.params.km||1.2;
+  const cap=S.params.cap||2500;
+  // Asignar vehículos para los flujos optimizados (no altera las asignaciones manuales)
+  S.asignacionesOpt=asignarVehiculos(S.flujosOpt,true);
+  let filas=S.flujosOpt.map((f,i)=>{
     let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
-    let co=+(cFlujo(f)*0.817).toFixed(2);
+    // distancia total en km
+    let dist=0;
+    if(p&&a&&pl&&d && p.lat!=null&&p.lng!=null&&a.lat!=null&&a.lng!=null&&pl.lat!=null&&pl.lng!=null&&d.lat!=null&&d.lng!=null){
+      dist = haversine(p.lat,p.lng,a.lat,a.lng)+haversine(a.lat,a.lng,pl.lat,pl.lng)+haversine(pl.lat,pl.lng,d.lat,d.lng);
+    }
+    let co=+(dist*costoKm).toFixed(2);
     let ef=f.litros/cap;
-    return{idx:i+1,orig:p?.nombre||'—',acop:a?.nombre||'—',plan:pl?.nombre||'—',dest:d?.nombre||'—',litros:f.litros,costo:co,ef};
+    return{idx:i+1,orig:p?.nombre||'—',acop:a?.nombre||'—',plan:pl?.nombre||'—',dest:d?.nombre||'—',litros:f.litros,dist, costo:co,ef};
   });
-  let coTot=asig.reduce((s,a)=>s+a.costo,0);
+  let coTot=filas.reduce((s,a)=>s+a.costo,0);
   let caAct=cTotal();
   let mej=caAct>0?((caAct-coTot)/caAct*100).toFixed(1):'0';
-  let ltT=asig.reduce((s,a)=>s+a.litros,0);
+  let ltT=filas.reduce((s,a)=>s+a.litros,0);
   document.getElementById('tC').textContent='$'+coTot.toFixed(2);
   document.getElementById('tM').textContent=mej+'%';
   document.getElementById('tL').textContent=ltT.toLocaleString()+' L';
-  document.getElementById('tR').textContent=asig.length;
-  tb.innerHTML=asig.map((a,i)=>{
+  document.getElementById('tR').textContent=filas.length;
+  tb.innerHTML=filas.map((a,i)=>{
     let ef=a.ef>=0.7?`<span class="badge bok">Óptima</span>`:a.ef>=0.5?`<span class="badge bwrn">Aceptable</span>`:`<span class="badge berr">Ineficiente</span>`;
-    // Obtén el vehículo asignado
-    let asignada=S.asignaciones.find(as=>as.rutaIdx===i);
+    // Vehículo asignado (óptimo)
+    let asignada=(S.asignacionesOpt||[]).find(as=>as.rutaIdx===i);
     let vehNombre=asignada?S.vehiculos[asignada.vehiculoIdx]?.nombre:'—';
-    return`<tr><td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${a.idx}</td><td><strong>${a.orig}</strong></td><td>${a.acop}</td><td>${a.plan}</td><td>${a.dest}</td><td class="num"><strong>${a.litros.toLocaleString()}</strong></td><td class="num" style="color:var(--gm);font-weight:700">$${a.costo.toFixed(2)}</td><td><span style="font-size:.72rem;color:var(--gm);font-weight:600">🚛 ${vehNombre}</span></td></tr>`;
+    return`<tr><td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${a.idx}</td><td><strong>${a.orig}</strong></td><td>${a.acop}</td><td>${a.plan}</td><td>${a.dest}</td><td class="num"><strong>${a.litros.toLocaleString()}</strong></td><td class="num">${a.dist.toFixed(1)} km</td><td class="num" style="color:var(--gm);font-weight:700">$${a.costo.toFixed(2)}</td><td><span style="font-size:.72rem;color:var(--gm);font-weight:600">🚛 ${vehNombre}</span></td></tr>`;
   }).join('');
-  document.getElementById('rutasV').innerHTML=asig.map(a=>`<div class="rv"><div class="rvh"><span class="rvn">🛣️ Ruta ${a.idx}: ${a.orig} → ${a.dest}</span><span class="rvl">${a.litros.toLocaleString()} L · $${a.costo.toFixed(2)}</span></div><div class="rvp"><span class="rn">🏡 ${a.orig}</span><span class="ra">→</span><span class="rn">🧊 ${a.acop}</span><span class="ra">→</span><span class="rn">🏭 ${a.plan}</span><span class="ra">→</span><span class="rn">🏪 ${a.dest}</span></div></div>`).join('');
-  let mx=Math.max(...asig.map(a=>a.litros),1);
-  document.getElementById('flujoB').innerHTML=asig.map(a=>`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:.73rem;font-weight:600;margin-bottom:4px;color:var(--g600)"><span>Ruta ${a.idx}: ${a.orig}</span><span style="font-family:var(--mo);color:var(--gm)">${a.litros.toLocaleString()} L</span></div><div style="background:var(--g100);border-radius:30px;height:12px;overflow:hidden"><div style="width:${(a.litros/mx*100).toFixed(0)}%;background:var(--gm);height:100%;border-radius:30px;transition:width .5s"></div></div></div>`).join('');
-  let fml=`== FUNCIÓN OBJETIVO MULTI-ETAPA ==\nMinimizar Z = Z1 + Z2 + Z3\n\nZ1 (Productor-Acopio): Σ Σ Cpa_ij · Xpa_ij\nZ2 (Acopio-Planta):    Σ Σ Cap_jk · Xap_jk\nZ3 (Planta-Destino):   Σ Σ Cpd_kl · Xpd_kl\n\n== COSTO ÓPTIMO ==\nZ* = $${coTot.toFixed(2)} / día\n\nAsignaciones:\n`;
-  asig.forEach(a=>{fml+=`  x${a.idx} = ${a.litros} L → $${a.costo.toFixed(2)}\n`;});
+  document.getElementById('rutasV').innerHTML=filas.map(a=>`<div class="rv"><div class="rvh"><span class="rvn">🛣️ Ruta ${a.idx}: ${a.orig} → ${a.dest}</span><span class="rvl">${a.litros.toLocaleString()} L · ${a.dist.toFixed(1)} km · $${a.costo.toFixed(2)}</span></div><div class="rvp"><span class="rn">🏡 ${a.orig}</span><span class="ra">→</span><span class="rn">🧊 ${a.acop}</span><span class="ra">→</span><span class="rn">🏭 ${a.plan}</span><span class="ra">→</span><span class="rn">🏪 ${a.dest}</span></div></div>`).join('');
+  let mx=Math.max(...filas.map(a=>a.litros),1);
+  document.getElementById('flujoB').innerHTML=filas.map(a=>`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:.73rem;font-weight:600;margin-bottom:4px;color:var(--g600)"><span>Ruta ${a.idx}: ${a.orig}</span><span style="font-family:var(--mo);color:var(--gm)">${a.litros.toLocaleString()} L</span></div><div style="background:var(--g100);border-radius:30px;height:12px;overflow:hidden"><div style="width:${(a.litros/mx*100).toFixed(0)}%;background:var(--gm);height:100%;border-radius:30px;transition:width .5s"></div></div></div>`).join('');
+  let fml=`== FUNCIÓN OBJETIVO (Distancia mínima) ==\nMin Z = Σ (d_pa + d_ap + d_pd) · kmCoste\n\nZ* = $${coTot.toFixed(2)} / día\n\nAsignaciones (óptimas por distancia):\n`;
+  filas.forEach(a=>{fml+=`  x${a.idx} = ${a.litros} L → ${a.dist.toFixed(1)} km → $${a.costo.toFixed(2)}\n`;});
   document.getElementById('fmlBox').textContent=fml;
   document.getElementById('fmlExp').textContent=fml;
 }
@@ -664,88 +681,104 @@ function copiarFml(){navigator.clipboard.writeText(document.getElementById('fmlE
 // ============================================================
 // ASIGNACIÓN DE VEHÍCULOS A RUTAS (RED LOGÍSTICA)
 // ============================================================
-function asignarVehiculos(){
-  if(!S.flujos.length||!S.vehiculos.length){
-    S.asignaciones=[];
-    return;
+function vehElegible(v){
+  const hoy=new Date();
+  hoy.setHours(0,0,0,0);
+  let permisoOK=false;
+  if(v.fechaVencimiento){
+    const venc=new Date(v.fechaVencimiento);
+    permisoOK = venc >= hoy;
   }
-  
-  // Algoritmo de asignación óptima: Best-Fit Decreasing
-  // Ordena rutas por litros descendente para mejor empaque
-  let rutasOrd=S.flujos.map((f,i)=>({idx:i,litros:f.litros}))
+  const frioOK = v.estadoFrio==='funciona';
+  return {permisoOK,frioOK,elegible:permisoOK&&frioOK};
+}
+
+function asignarVehiculos(flujos, returnOnly){
+  const baseFlujos = Array.isArray(flujos)? flujos : S.flujos;
+  if(!baseFlujos.length||!S.vehiculos.length){
+    if(returnOnly) return [];
+    S.asignaciones=[]; return [];
+  }
+
+  // Ordena rutas por litros (desc) para mejor ajuste
+  const rutasOrd=baseFlujos.map((f,i)=>({idx:i,litros:f.litros}))
     .sort((a,b)=>b.litros-a.litros);
-  
-  // Copia de vehículos disponibles con su capacidad
-  let vehiculosDisp=S.vehiculos.map((v,i)=>({
-    idx:i,
-    nombre:v.nombre,
-    tipo:v.tipo,
-    capacidad:v.capacidad,
-    disponible:v.capacidad,
-    asignadas:[]
-  }));
-  
-  S.asignaciones=[];
-  
-  // Asigna cada ruta al vehículo con mejor ajuste
+
+  // Solo considerar vehículos con permiso vigente y cadena de frío funcionando
+  const vehiculosElegibles=S.vehiculos.map((v,i)=>{
+    const minCap=(v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : 0));
+    const maxCap=(v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0));
+    const elig=vehElegible(v);
+    return {idx:i,nombre:v.nombre,tipo:v.tipo,capacidadMin:minCap,capacidadMax:maxCap,usado:false,elegible:elig.elegible};
+  }).filter(v=>v.elegible);
+
+  const asignaciones=[];
+
+  // Un camión por ruta: cada vehículo puede cubrir a lo sumo una ruta
   rutasOrd.forEach(ruta=>{
     let mejorVeh=null;
     let mejorAjuste=Infinity;
-    
-    // Busca el vehículo con capacidad suficiente y menor desperdicio
-    vehiculosDisp.forEach(v=>{
-      if(v.disponible>=ruta.litros){
-        let desperdicio=v.disponible-ruta.litros;
+    vehiculosElegibles.forEach(v=>{
+      if(v.usado) return;
+      if(ruta.litros>=v.capacidadMin && ruta.litros<=v.capacidadMax){
+        const desperdicio=v.capacidadMax - ruta.litros;
         if(desperdicio<mejorAjuste){
-          mejorAjuste=desperdicio;
-          mejorVeh=v;
+          mejorAjuste=desperdicio;mejorVeh=v;
         }
       }
     });
-    
-    // Si no hay vehículo disponible con capacidad, busca el más grande
-    if(!mejorVeh){
-      vehiculosDisp.forEach(v=>{
-        if(!mejorVeh||v.capacidad>mejorVeh.capacidad){
-          mejorVeh=v;
-        }
-      });
-    }
-    
     if(mejorVeh){
-      mejorVeh.disponible-=ruta.litros;
-      mejorVeh.asignadas.push(ruta.idx);
-      S.asignaciones.push({
+      mejorVeh.usado=true;
+      asignaciones.push({
         rutaIdx:ruta.idx,
         vehiculoIdx:mejorVeh.idx,
         litros:ruta.litros,
-        capacidad:mejorVeh.capacidad,
-        utilizacion:((ruta.litros/mejorVeh.capacidad)*100).toFixed(1)
+        capacidad:mejorVeh.capacidadMax,
+        utilizacion:((ruta.litros/mejorVeh.capacidadMax)*100).toFixed(1)
       });
     }
   });
-  
-  save();
+
+  if(returnOnly){
+    return asignaciones;
+  }else{
+    S.asignaciones=asignaciones; save(); return asignaciones;
+  }
 }
 
-function renderAsignacionesVehiculos(){
-  let html='<table style="font-size:.76rem;width:100%"><thead><tr><th>Vehículo</th><th>Rutas</th><th>Litros</th><th>Utilización</th></tr></thead><tbody>';
-  
+function renderAsignacionesVehiculos(asignaciones){
+  let html='<table style="font-size:.76rem;width:100%"><thead><tr><th>Vehículo</th><th>Rutas</th><th>Litros</th><th>Utilización</th><th>Estado</th></tr></thead><tbody>';
+
   S.vehiculos.forEach((v,vi)=>{
-    let asig=S.asignaciones.filter(a=>a.vehiculoIdx===vi);
+    const elig=vehElegible(v);
+    const razones=[];
+    if(!elig.permisoOK) razones.push('permiso vencido');
+    if(!elig.frioOK) razones.push('sin cadena de frío');
+    let asig=(asignaciones||[]).filter(a=>a.vehiculoIdx===vi);
+
     if(!asig.length){
-      html+=`<tr><td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g400)">${v.nombre} <span style="font-size:.65rem;color:var(--g400)">(${v.tipo})</span></td>
-             <td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g400)">—</td>
-             <td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g400)">0 L</td>
-             <td style="padding:8px 0;border-bottom:1px solid var(--g100)">0%</td></tr>`;
+      const estadoHTML = elig.elegible
+        ? '<span class="badge bok">Disponible</span>'
+        : `<span class="badge berr">No cumple requisitos</span>${razones.length?`<div style="font-size:.64rem;color:#991b1b;margin-top:3px">${razones.join(' · ')}</div>`:''}`;
+      html+=`<tr>
+        <td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g800)">${v.nombre} <div style="font-size:.65rem;color:var(--g400)">${v.tipo}</div></td>
+        <td style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g400)">—</td>
+        <td class="num" style="padding:8px 0;border-bottom:1px solid var(--g100);color:var(--g400)">0 L</td>
+        <td style="padding:8px 0;border-bottom:1px solid var(--g100)">0%</td>
+        <td style="padding:8px 0;border-bottom:1px solid var(--g100)">${estadoHTML}</td>
+      </tr>`;
       return;
     }
-    
+
     let totalLitros=asig.reduce((s,a)=>s+a.litros,0);
-    let pct=Math.min(100,+(totalLitros/v.capacidad*100).toFixed(0));
+    let capMax = (v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0))||1;
+    let pct=Math.min(100,+(totalLitros/capMax*100).toFixed(0));
     let col=pct>=80?'#1c6e4a':pct>=50?'#f59e0b':'#dc2626';
     let rutasStr=asig.map(a=>'R'+(a.rutaIdx+1)).join(', ');
-    
+    const estadoHTMLUsed = elig.elegible
+      ? '<span class="badge bok">Asignado</span>'
+      : `<span class="badge berr">No cumple requisitos</span>${razones.length?`<div style=\"font-size:.64rem;color:#991b1b;margin-top:3px\">${razones.join(' · ')}</div>`:''}`;
+
     html+=`<tr style="background:rgba(28,110,74,.05)">
       <td style="padding:10px 0;border-bottom:1px solid var(--g100);font-weight:600">${v.nombre}<div style="font-size:.65rem;color:var(--g400);margin-top:2px">${v.tipo}</div></td>
       <td style="padding:10px 0;border-bottom:1px solid var(--g100);font-family:var(--mo);font-size:.75rem;color:var(--gm);font-weight:600">${rutasStr}</td>
@@ -756,9 +789,10 @@ function renderAsignacionesVehiculos(){
         </div>
         <div style="font-size:.63rem;color:var(--g400);margin-top:2px;font-family:var(--mo)">${pct}%</div>
       </td>
+      <td style="padding:10px 0;border-bottom:1px solid var(--g100)">${estadoHTMLUsed}</td>
     </tr>`;
   });
-  
+
   html+='</tbody></table>';
   return html;
 }
@@ -798,6 +832,76 @@ function makeLIcon(letra,color,forma){
   let r=forma==='c'?'50%':'5px';
   return L.divIcon({html:`<div style="background:${color};border-radius:${r};width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:'IBM Plex Sans',sans-serif">${letra}</div>`,iconSize:[28,28],iconAnchor:[14,14],className:''});
 }
+// Genera N colores únicos y agradables usando HSL
+function genRouteColors(n){
+  const toHex=v=>('0'+v.toString(16)).slice(-2);
+  const hslToHex=(h,s,l)=>{
+    s/=100; l/=100;
+    const c=(1-Math.abs(2*l-1))*s;
+    const x=c*(1-Math.abs((h/60)%2-1));
+    const m=l-c/2;
+    let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){g=c;b=x;} else if(h<240){g=x;b=c;} else if(h<300){r=x;b=c;} else {r=c;b=x;}
+    r=Math.round((r+m)*255); g=Math.round((g+m)*255); b=Math.round((b+m)*255);
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  };
+  const colors=[];
+  const seed=12; // determinista para consistencia visual
+  for(let i=0;i<n;i++){
+    const h=(seed + (360*i/n))%360; // espaciado uniforme
+    const s=68; // saturación
+    const l=48; // luminosidad
+    colors.push(hslToHex(h,s,l));
+  }
+  return colors;
+}
+// Distancia Haversine (km) entre dos coordenadas
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371; // km
+  const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  return R*c;
+}
+// Construye flujos optimizados minimizando distancia P->A->Pl->D por productor
+function computeOptimizedFlows(){
+  if(!S.flujos.length) return [];
+  const hasCoords = n => n && typeof n.lat==='number' && typeof n.lng==='number';
+  const AC=S.acopios.filter(hasCoords);
+  const PL=S.plantas.filter(hasCoords);
+  const DE=S.destinos.filter(hasCoords);
+  if(!AC.length||!PL.length||!DE.length){ return S.flujos.map(f=>({...f})); }
+  const bestByProd=new Map();
+  S.productores.forEach((p,pi)=>{
+    if(!hasCoords(p)) return;
+    let best=null;
+    for(let aj=0;aj<AC.length;aj++){
+      const a=AC[aj];
+      for(let pk=0;pk<PL.length;pk++){
+        const pl=PL[pk];
+        for(let dl=0;dl<DE.length;dl++){
+          const d=DE[dl];
+          const d1=haversine(p.lat,p.lng,a.lat,a.lng);
+          const d2=haversine(a.lat,a.lng,pl.lat,pl.lng);
+          const d3=haversine(pl.lat,pl.lng,d.lat,d.lng);
+          const dist=d1+d2+d3;
+          if(!best||dist<best.dist){
+            best={dist, acopIdx:S.acopios.indexOf(a), planIdx:S.plantas.indexOf(pl), destIdx:S.destinos.indexOf(d)};
+          }
+        }
+      }
+    }
+    if(best) bestByProd.set(pi,best);
+  });
+  const fl=S.flujos.map(f=>{
+    const b=bestByProd.get(f.prod);
+    if(b){ return {prod:f.prod, acop:b.acopIdx, plan:b.planIdx, dest:b.destIdx, litros:f.litros}; }
+    return {...f};
+  });
+  return fl;
+}
 async function osrmRoute(pts,color,w,tip){
   let coords=pts.map(p=>`${p.lng},${p.lat}`).join(';');
   let url=`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
@@ -809,7 +913,20 @@ async function osrmRoute(pts,color,w,tip){
       let ll=d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
       let poly=L.polyline(ll,{color,weight:w,opacity:.93}).addTo(lmap);
       poly.bindTooltip(tip,{sticky:true});
-      mPoly.push(poly);return;
+      mPoly.push(poly);
+      // Conector inicial desde el productor hasta el inicio de la ruta (evita espacios)
+      try{
+        if(ll && ll.length>0 && pts && pts.length>0){
+          const sp=L.latLng(pts[0].lat,pts[0].lng);
+          const rp=L.latLng(ll[0][0],ll[0][1]);
+          const dist=sp.distanceTo(rp); // en metros
+          if(isFinite(dist) && dist>25){
+            let pre=L.polyline([[sp.lat,sp.lng],[rp.lat,rp.lng]],{color,weight:Math.max(2,w-1),opacity:.93}).addTo(lmap);
+            mPoly.push(pre);
+          }
+        }
+      }catch(_e){}
+      return;
     }
   }catch(e){}
   let ll=pts.map(p=>[p.lat,p.lng]);
@@ -818,9 +935,8 @@ async function osrmRoute(pts,color,w,tip){
   mPoly.push(poly);
 }
 function getFlujosAntes(){
-  let base=S.flujos.map(f=>({...f}));
-  let extra=base.map(f=>({...f,litros:Math.round(f.litros*.45)}));
-  return [...base,...extra].slice(0,Math.min(base.length*2,8));
+  // En modo "sin optimizar" debe reflejar exactamente los datos ingresados
+  return S.flujos.map(f=>({...f}));
 }
 function refMap(){
   if(!lmap) return;
@@ -833,12 +949,17 @@ function refMap(){
     document.getElementById('vehDiv').innerHTML='';
     return;
   }
-  let fa=modoR==='ant'?getFlujosAntes():[...S.flujos];
+  // Elegir conjunto de flujos según modo
+  if(modoR==='opt'){
+    if(!S.flujosOpt) S.flujosOpt=computeOptimizedFlows();
+    if(!S.asignacionesOpt) S.asignacionesOpt=asignarVehiculos(S.flujosOpt,true);
+  }
+  let fa = (modoR==='ant') ? getFlujosAntes() : (S.flujosOpt ? [...S.flujosOpt] : [...S.flujos]);
   let idx = 0;
   if(vistaR==='ind'){
     idx=parseInt(document.getElementById('sRI').value)||0;
   }
-  document.getElementById('sRI').innerHTML = fa.map((f,i)=>`<option value="${i}">Ruta ${i+1}: ${S.productores[f.prod]?.nombre||'?'}</option>`).join('');
+  document.getElementById('sRI').innerHTML = fa.map((f,i)=>`<option value="${i}">Ruta ${i+1}: ${S.productores[f.prod]?.nombre||'?'} </option>`).join('');
   if(vistaR==='ind'){
     fa=[fa[Math.min(idx,fa.length-1)]];
     document.getElementById('sRI').value = idx;
@@ -861,33 +982,64 @@ function refMap(){
   const CANT=['#c23b22','#e74c3c','#e67e22','#d35400'];
   let cap=S.params.cap||2500;
   let maxL=Math.max(...fa.map(f=>f.litros),1);
+  let cubiertas=0, litrosCubiertos=0;
+  // Colores únicos por ruta (sin repetición) en la vista actual
+  const routeColors=genRouteColors(fa.length);
   fa.forEach((f,i)=>{
     let p=S.productores[f.prod],a=S.acopios[f.acop],pl=S.plantas[f.plan],d=S.destinos[f.dest];
     if(!p?.lat||!a?.lat||!pl?.lat||!d?.lat)return;
     let pts=[{lat:p.lat,lng:p.lng},{lat:a.lat,lng:a.lng},{lat:pl.lat,lng:pl.lng},{lat:d.lat,lng:d.lng}];
-    let esEf=modoR==='opt'&&f.litros>=cap*0.6;
-    let col=modoR==='ant'?CANT[i%CANT.length]:(esEf?COPT[i%COPT.length]:'#c23b22');
+    // Determinar cobertura según el conjunto de asignaciones del modo actual
+    let baseFlujos = (modoR==='opt' ? (S.flujosOpt||[]) : S.flujos);
+    let baseAsigs = (modoR==='opt' ? (S.asignacionesOpt||[]) : (S.asignaciones||[]));
+    let ri = baseFlujos.findIndex(fl=>fl.prod===f.prod&&fl.acop===f.acop&&fl.plan===f.plan&&fl.dest===f.dest&&fl.litros===f.litros);
+    let asig = (ri>-1) ? baseAsigs.find(a=>a.rutaIdx===ri) : null;
+    let veh = asig ? S.vehiculos[asig.vehiculoIdx] : null;
+    let capMax = veh ? (veh.capacidadMax!=null ? veh.capacidadMax : (veh.capacidad!=null ? veh.capacidad : 0)) : 0;
+    let eleg = veh ? vehElegible(veh) : {elegible:false};
+    let cubierta = !!(asig && eleg.elegible && f.litros<=capMax);
+    if(cubierta){cubiertas++; litrosCubiertos+=f.litros;}
+    // En vista individual: optimizado = verde, sin optimizar = rojo
+    let col = (vistaR==='ind') ? (modoR==='opt' ? '#16a34a' : '#dc2626') : routeColors[i];
     let gr=Math.max(3,Math.min(9,Math.round(f.litros/maxL*7)+2));
-    osrmRoute(pts,col,gr,`🚛 Ruta ${vistaR==='ind'?idx+1:i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`);
+    let tip=`${cubierta?'✅':'❌'} Ruta ${vistaR==='ind'?idx+1:i+1}: ${p.nombre} → ${d.nombre} | ${f.litros.toLocaleString()} L/día`;
+    osrmRoute(pts,col,gr,tip);
   });
   document.getElementById('routeList').innerHTML=fa.map((f,i)=>{
     let p=S.productores[f.prod],d=S.destinos[f.dest];
-    let c=modoR==='ant'?'#c23b22':(f.litros>=(S.params.cap||2500)*0.6?'#1c6e4a':'#c23b22');
-    // Busca el vehículo asignado a esta ruta
-    let flujIdx=S.flujos.findIndex(fl=>fl.prod===f.prod&&fl.acop===f.acop&&fl.plan===f.plan&&fl.dest===f.dest&&fl.litros===f.litros);
-    let asignada=S.asignaciones.find(a=>a.rutaIdx===flujIdx);
-    let vehiculoInfo=asignada?S.vehiculos[asignada.vehiculoIdx]:'sin asignar';
-    let vehStr=vehiculoInfo&&vehiculoInfo!=='sin asignar'?`🚛 ${vehiculoInfo.nombre}`:' — ';
-    return`<div class="rpi" onclick="centrarR(${f.prod})"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${vistaR==='ind'?idx+1:i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'}</div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div><div style="font-size:.67rem;color:var(--gm);padding-left:18px;margin-top:4px;font-weight:600">${vehStr}</div></div>`;
+    let baseFlujos = (modoR==='opt' ? (S.flujosOpt||[]) : S.flujos);
+    let baseAsigs = (modoR==='opt' ? (S.asignacionesOpt||[]) : (S.asignaciones||[]));
+    let flujIdx=baseFlujos.findIndex(fl=>fl.prod===f.prod&&fl.acop===f.acop&&fl.plan===f.plan&&fl.dest===f.dest&&fl.litros===f.litros);
+    let asignada=baseAsigs.find(a=>a.rutaIdx===flujIdx);
+    let vehiculoInfo=asignada?S.vehiculos[asignada.vehiculoIdx]:null;
+    let capMax = vehiculoInfo ? (vehiculoInfo.capacidadMax!=null ? vehiculoInfo.capacidadMax : (vehiculoInfo.capacidad!=null ? vehiculoInfo.capacidad : 0)) : 0;
+    let elig = vehiculoInfo ? vehElegible(vehiculoInfo) : {elegible:false,permisoOK:false,frioOK:false};
+    let cubierta = !!(asignada && elig.elegible && f.litros<=capMax);
+    // Mantener consistencia del color en el panel lateral
+    let c = (vistaR==='ind') ? (modoR==='opt' ? '#16a34a' : '#dc2626') : routeColors[i];
+    let vehStr=vehiculoInfo?`🚛 ${vehiculoInfo.nombre}`:'—';
+    let badge = cubierta ? '<span class="badge bok">✔ Cubierta</span>' : '<span class="badge berr">✘ No cubierta</span>';
+    let motivo = '';
+    if(!cubierta){
+      let razones=[];
+      if(!vehiculoInfo) razones.push('sin camión');
+      else{
+        if(!elig.permisoOK) razones.push('permiso vencido');
+        if(!elig.frioOK) razones.push('sin cadena de frío');
+        if(f.litros>capMax) razones.push('excede capacidad');
+      }
+      motivo = `<div style="font-size:.64rem;color:#991b1b;padding-left:18px">${razones.join(' · ')}</div>`;
+    }
+    return`<div class="rpi" onclick="centrarR(${f.prod})" style="border-left:4px solid ${c}"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:11px;height:11px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span style="font-weight:700;font-size:.78rem">Ruta ${vistaR==='ind'?idx+1:i+1}</span></div><div style="font-size:.7rem;color:var(--g600);padding-left:18px">${p?.nombre||'?'} → ${d?.nombre||'?'} </div><div style="font-size:.68rem;color:var(--g400);padding-left:18px;font-family:var(--mo)">${f.litros.toLocaleString()} L/día</div><div style="font-size:.67rem;color:var(--gm);padding-left:18px;margin-top:4px;font-weight:600">${vehStr} · ${badge}</div>${motivo}</div>`;
   }).join('');
   document.getElementById('stP').textContent=S.productores.length;
   document.getElementById('stA').textContent=S.acopios.length;
   document.getElementById('stPl').textContent=S.plantas.length;
   document.getElementById('stD').textContent=S.destinos.length;
-  document.getElementById('stR').textContent=fa.length;
-  document.getElementById('stL').textContent=fa.reduce((s,f)=>s+f.litros,0).toLocaleString()+' L';
+  document.getElementById('stR').textContent=cubiertas;
+  document.getElementById('stL').textContent=litrosCubiertos.toLocaleString()+' L';
   // Mostrar asignación de vehículos a rutas
-  document.getElementById('vehDiv').innerHTML=renderAsignacionesVehiculos();
+  document.getElementById('vehDiv').innerHTML=renderAsignacionesVehiculos(modoR==='opt' ? (S.asignacionesOpt||[]) : (S.asignaciones||[]));
 }
 function centrarR(pi){if(!lmap)return;let p=S.productores[pi];if(p?.lat)lmap.setView([p.lat,p.lng],11);}
 
@@ -899,73 +1051,72 @@ function centrarR(pi){if(!lmap)return;let p=S.productores[pi];if(p?.lat)lmap.set
 // ============================================================
 function renderLegal(){
   let c=document.getElementById('listaL');
-  // Calcular cumplimiento automáticamente basado en asignaciones
-  let cumplimiento = [];
-  S.asignaciones.forEach(asig => {
-    let veh = S.vehiculos[asig.vehiculoIdx];
-    let ruta = S.flujos[asig.rutaIdx];
-    let rutaNombre = 'Ruta ' + (asig.rutaIdx + 1) + ': ' + ruta.orig + ' -> ' + ruta.dest;
-    
-    // Vigencia del permiso
-    let vigencia = 'Vencido';
-    if (veh.fechaVencimiento) {
-      let hoy = new Date();
-      let venc = new Date(veh.fechaVencimiento);
-      if (venc >= hoy) {
-        vigencia = 'Vigente';
+  // Cumplimiento por vehículo (sin columna de ruta)
+  let cumplimiento = S.vehiculos.map((veh,vi)=>{
+    const hoy=new Date(); hoy.setHours(0,0,0,0);
+    let vigencia='—';
+    if(veh.fechaVencimiento){
+      let venc=new Date(veh.fechaVencimiento);
+      vigencia = (venc>=hoy)?'Vigente':'Vencido';
+    }
+    let capMax=(veh.capacidadMax!=null ? veh.capacidadMax : (veh.capacidad!=null ? veh.capacidad : 0))||0;
+    let frio = veh.estadoFrio==='funciona' ? 'Funciona' : 'No funciona';
+    let asig=S.asignaciones.filter(a=>a.vehiculoIdx===vi);
+    let totalLitros=asig.reduce((s,a)=>s+a.litros,0);
+    // Si no está asignado, el peso (capacidad) no aplica: lo consideramos OK
+    let pesoOK = asig.length? (totalLitros <= capMax) : true;
+    let permisoOK = vigencia==='Vigente';
+    let frioOK = veh.estadoFrio==='funciona';
+    let cumple = pesoOK && permisoOK && frioOK;
+    // Uso / Observación
+    let uso = '';
+    if(asig.length){
+      uso = 'Asignado';
+    }else{
+      if(!permisoOK || !frioOK){
+        const rs=[]; if(!permisoOK) rs.push('permiso vencido'); if(!frioOK) rs.push('sin cadena de frío');
+        uso = 'No usado — ' + (rs.join(' y ')||'no cumple requisitos');
+      }else{
+        uso = 'No usado — disponible';
       }
     }
-    
-    // Peso máximo (capacidad)
-    let pesoMax = veh.capacidad;
-    
-    // Cadena de frío
-    let frio = veh.estadoFrio === 'funciona' ? 'Funciona' : 'No funciona';
-    
-    // Estado
-    let pesoOK = asig.litros <= veh.capacidad;
-    let permisoOK = vigencia === 'Vigente';
-    let frioOK = veh.estadoFrio === 'funciona';
-    let cumple = pesoOK && permisoOK && frioOK;
-    
-    cumplimiento.push({
-      ruta: rutaNombre,
+    return {
       placa: veh.nombre,
       tipo: veh.tipo,
-      vigencia: vigencia,
-      pesoMax: pesoMax,
-      frio: frio,
+      vigencia,
+      pesoMax: capMax,
+      frio,
       estado: cumple ? 'Cumple' : 'Incumple',
-      pesoOK: pesoOK,
-      permisoOK: permisoOK,
-      frioOK: frioOK
-    });
+      uso,
+      // métricas para el radar
+      pesoOK, permisoOK, frioOK
+    };
   });
-  
-  if(!cumplimiento.length){
-    c.innerHTML=`<div style="padding:14px;text-align:center;color:var(--g400);font-size:.78rem">Sin rutas asignadas</div>`;
+
+  if(!S.vehiculos.length){
+    c.innerHTML=`<div style="padding:14px;text-align:center;color:var(--g400);font-size:.78rem">Sin vehículos registrados</div>`;
   }else{
-    c.innerHTML=`<table><thead><tr><th>Ruta</th><th>Placa</th><th>Tipo de Camión</th><th>Vigencia Permiso</th><th>Peso Máximo (L)</th><th>Cadena Frío</th><th>Estado</th></tr></thead><tbody>${cumplimiento.map((l,i)=>{
+    c.innerHTML=`<table><thead><tr><th>Placa</th><th>Tipo de Camión</th><th>Vigencia Permiso</th><th>Peso Máximo (L)</th><th>Cadena Frío</th><th>Uso / Estado</th></tr></thead><tbody>${cumplimiento.map((l)=>{
       let badgeClass = l.estado === 'Cumple' ? 'bok' : 'berr';
       let vigenciaClass = l.vigencia === 'Vigente' ? 'bok' : 'berr';
       let frioClass = l.frio === 'Funciona' ? 'bok' : 'berr';
+      let usoClass = l.uso.includes('No usado') ? (l.uso.includes('disponible')? 'bok':'berr') : 'bok';
       return '<tr>' +
-        '<td>' + l.ruta + '</td>' +
         '<td><strong>' + l.placa + '</strong></td>' +
         '<td>' + l.tipo + '</td>' +
         '<td><span class="badge ' + vigenciaClass + '">' + l.vigencia + '</span></td>' +
         '<td class="num">' + l.pesoMax.toLocaleString() + '</td>' +
         '<td><span class="badge ' + frioClass + '">' + l.frio + '</span></td>' +
-        '<td><span class="badge ' + badgeClass + '">' + (l.estado === 'Cumple' ? '✔ Cumple' : '✘ Incumple') + '</span></td>' +
+        '<td>' + (l.uso ? ('<span class="badge ' + usoClass + '">' + l.uso + '</span>') : ('<span class="badge ' + badgeClass + '">' + (l.estado==='Cumple'?'✔ Cumple':'✘ Incumple') + '</span>')) + '</td>' +
       '</tr>';
     }).join('')}</tbody></table>`;
   }
-  
+
   if(chL){chL.destroy();chL=null;}
   let permisosOK = cumplimiento.filter(l => l.permisoOK).length;
   let pesoOK = cumplimiento.filter(l => l.pesoOK).length;
   let frioOK = cumplimiento.filter(l => l.frioOK).length;
-  let tot = Math.max(cumplimiento.length, 1);
+  let tot = Math.max(S.vehiculos.length, 1);
   let permisosPct = (permisosOK / tot) * 100;
   let pesoPct = (pesoOK / tot) * 100;
   let frioPct = (frioOK / tot) * 100;
@@ -984,26 +1135,27 @@ function previa(tipo,btn){
   else if(tipo==='acopios')h=`<table><thead><tr><th>Nombre</th><th>Cantón</th><th>Costo $/L</th></tr></thead><tbody>${S.acopios.map(a=>`<tr><td>${a.nombre}</td><td>${a.canton}</td><td class="num">$${a.costoOp}</td></tr>`).join('')}</tbody></table>`;
   else if(tipo==='plantas')h=`<table><thead><tr><th>Nombre</th><th>Cantón</th><th>Costo $/L</th></tr></thead><tbody>${S.plantas.map(p=>`<tr><td>${p.nombre}</td><td>${p.canton}</td><td class="num">$${p.costoProc}</td></tr>`).join('')}</tbody></table>`;
   else if(tipo==='destinos')h=`<table><thead><tr><th>Nombre</th><th>Tipo</th><th>Demanda</th><th>Precio</th></tr></thead><tbody>${S.destinos.map(d=>`<tr><td>${d.nombre}</td><td>${d.tipo}</td><td class="num">${d.demanda}</td><td class="num">$${d.precio}</td></tr>`).join('')}</tbody></table>`;
-  else if(tipo==='vehiculos')h=`<table><thead><tr><th>Placa</th><th>Tipo</th><th>Capacidad</th><th>Costo $/km</th><th>Permiso ANT</th><th>Cadena Frío</th></tr></thead><tbody>${S.vehiculos.map(v=>`<tr><td>${v.nombre}</td><td>${v.tipo}</td><td class="num">${v.capacidad}</td><td class="num">$${v.costoKm}</td><td>${v.fechaVencimiento||'—'}</td><td>${v.estadoFrio==='funciona'?'✅ Funciona':'❌ No funciona'}</td></tr>`).join('')}</tbody></table>`;
+  else if(tipo==='vehiculos')h=`<table><thead><tr><th>Placa</th><th>Tipo</th><th>Capacidad</th><th>Costo $/km</th><th>Permiso ANT</th><th>Cadena Frío</th></tr></thead><tbody>${S.vehiculos.map(v=>{let minCap=(v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : 0)); let maxCap=(v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0)); let capLabel=minCap && maxCap ? (minCap===maxCap ? maxCap : `${minCap} - ${maxCap}`) : '—'; return `<tr><td>${v.nombre}</td><td>${v.tipo}</td><td class="num">${capLabel}</td><td class="num">$${v.costoKm}</td><td>${v.fechaVencimiento||'—'}</td><td>${v.estadoFrio==='funciona'?'✅ Funciona':'❌ No funciona'}</td></tr>`}).join('')}</tbody></table>`;
   else if(tipo==='flujos')h=`<table><thead><tr><th>#</th><th>Productor</th><th>Acopio</th><th>Planta</th><th>Destino</th><th>Litros</th></tr></thead><tbody>${S.flujos.map((f,i)=>`<tr><td>${i+1}</td><td>${S.productores[f.prod]?.nombre||'?'}</td><td>${S.acopios[f.acop]?.nombre||'?'}</td><td>${S.plantas[f.plan]?.nombre||'?'}</td><td>${S.destinos[f.dest]?.nombre||'?'}</td><td class="num">${f.litros}</td></tr>`).join('')}</tbody></table>`;
   else if(tipo==='legales'){
     let cumplimiento = [];
-    S.asignaciones.forEach(asig => {
-      let veh = S.vehiculos[asig.vehiculoIdx];
-      let ruta = S.flujos[asig.rutaIdx];
-      let rutaNombre = `Ruta ${asig.rutaIdx + 1}: ${ruta.orig} → ${ruta.dest}`;
-      let vigencia = 'Vencido';
-      if (veh.fechaVencimiento) {
-        let hoy = new Date();
-        let venc = new Date(veh.fechaVencimiento);
-        if (venc >= hoy) vigencia = 'Vigente';
+    S.flujos.forEach((ruta,ri)=>{
+      let p=S.productores[ruta.prod]?.nombre||'?';
+      let d=S.destinos[ruta.dest]?.nombre||'?';
+      let asig=S.asignaciones.find(a=>a.rutaIdx===ri);
+      if(!asig){
+        cumplimiento.push({Ruta:`Ruta ${ri+1}: ${p} → ${d}`,Placa:'—','Tipo de Camión':'—','Vigencia Permiso':'—','Peso Máximo (L)':0,'Cadena Frío':'—',Estado:'Incumple'});
+        return;
       }
-      let frio = veh.estadoFrio === 'funciona' ? 'Funciona' : 'No funciona';
-      let pesoOK = asig.litros <= veh.capacidad;
-      let permisoOK = vigencia === 'Vigente';
-      let frioOK = veh.estadoFrio === 'funciona';
-      let estado = (pesoOK && permisoOK && frioOK) ? 'Cumple' : 'Incumple';
-      cumplimiento.push({Ruta: rutaNombre, Placa: veh.nombre, 'Tipo de Camión': veh.tipo, 'Vigencia Permiso': vigencia, 'Peso Máximo (L)': veh.capacidad, 'Cadena Frío': frio, Estado: estado});
+      let veh=S.vehiculos[asig.vehiculoIdx];
+      let hoy=new Date(); hoy.setHours(0,0,0,0);
+      let vigencia='Vencido';
+      if(veh.fechaVencimiento){let venc=new Date(veh.fechaVencimiento); if(venc>=hoy) vigencia='Vigente';}
+      let capMax=(veh.capacidadMax!=null ? veh.capacidadMax : (veh.capacidad!=null ? veh.capacidad : 0));
+      let frio=veh.estadoFrio==='funciona'?'Funciona':'No funciona';
+      let pesoOK=asig.litros<=capMax; let permisoOK=vigencia==='Vigente'; let frioOK=veh.estadoFrio==='funciona';
+      let estado=(pesoOK&&permisoOK&&frioOK)?'Cumple':'Incumple';
+      cumplimiento.push({Ruta:`Ruta ${ri+1}: ${p} → ${d}`, Placa:veh.nombre, 'Tipo de Camión':veh.tipo, 'Vigencia Permiso':vigencia, 'Peso Máximo (L)':capMax, 'Cadena Frío':frio, Estado:estado});
     });
     h=`<table><thead><tr><th>Ruta</th><th>Placa</th><th>Tipo de Camión</th><th>Vigencia Permiso</th><th>Peso Máximo (L)</th><th>Cadena Frío</th><th>Estado</th></tr></thead><tbody>${cumplimiento.map(l=>`<tr><td>${l.Ruta}</td><td>${l.Placa}</td><td>${l['Tipo de Camión']}</td><td>${l['Vigencia Permiso']}</td><td class="num">${l['Peso Máximo (L)']}</td><td>${l['Cadena Frío']}</td><td>${l.Estado}</td></tr>`).join('')}</tbody></table>`;
   }
@@ -1019,34 +1171,27 @@ function expExcel(){
     'Flujos':S.flujos.map((f,i)=>({'#':i+1,Productor:S.productores[f.prod]?.nombre,Acopio:S.acopios[f.acop]?.nombre,Planta:S.plantas[f.plan]?.nombre,Destino:S.destinos[f.dest]?.nombre,'Litros/día':f.litros})),
     'Legales': (() => {
       let cumplimiento = [];
-      S.asignaciones.forEach(asig => {
-        let veh = S.vehiculos[asig.vehiculoIdx];
-        let ruta = S.flujos[asig.rutaIdx];
-        let rutaNombre = 'Ruta ' + (asig.rutaIdx + 1) + ': ' + ruta.orig + ' -> ' + ruta.dest;
-        let vigencia = 'Vencido';
-        if (veh.fechaVencimiento) {
-          let hoy = new Date();
-          let venc = new Date(veh.fechaVencimiento);
-          if (venc >= hoy) vigencia = 'Vigente';
+      S.flujos.forEach((ruta,ri)=>{
+        let p=S.productores[ruta.prod]?.nombre||'?';
+        let d=S.destinos[ruta.dest]?.nombre||'?';
+        let asig=S.asignaciones.find(a=>a.rutaIdx===ri);
+        if(!asig){
+          cumplimiento.push({Ruta:`Ruta ${ri+1}: ${p} -> ${d}`, Placa:'—','Tipo de Camión':'—','Vigencia Permiso':'—','Peso Máximo (L)':0,'Cadena Frío':'—',Estado:'Incumple'});
+          return;
         }
-        let frio = veh.estadoFrio === 'funciona' ? 'Funciona' : 'No funciona';
-        let pesoOK = asig.litros <= veh.capacidad;
-        let permisoOK = vigencia === 'Vigente';
-        let frioOK = veh.estadoFrio === 'funciona';
-        let estado = (pesoOK && permisoOK && frioOK) ? 'Cumple' : 'Incumple';
-        cumplimiento.push({
-          Ruta: rutaNombre,
-          Placa: veh.nombre,
-          'Tipo de Camión': veh.tipo,
-          'Vigencia Permiso': vigencia,
-          'Peso Máximo (L)': veh.capacidad,
-          'Cadena Frío': frio,
-          Estado: estado
-        });
+        let veh=S.vehiculos[asig.vehiculoIdx];
+        let hoy=new Date(); hoy.setHours(0,0,0,0);
+        let vigencia='Vigente';
+        if(veh.fechaVencimiento){let venc=new Date(veh.fechaVencimiento); if(venc<hoy) vigencia='Vencido';}
+        let capMax=(veh.capacidadMax!=null ? veh.capacidadMax : (veh.capacidad!=null ? veh.capacidad : 0));
+        let frio=veh.estadoFrio==='funciona'?'Funciona':'No funciona';
+        let pesoOK=asig.litros<=capMax; let permisoOK=vigencia==='Vigente'; let frioOK=veh.estadoFrio==='funciona';
+        let estado=(pesoOK&&permisoOK&&frioOK)?'Cumple':'Incumple';
+        cumplimiento.push({Ruta:`Ruta ${ri+1}: ${p} -> ${d}`, Placa:veh.nombre, 'Tipo de Camión':veh.tipo, 'Vigencia Permiso':vigencia, 'Peso Máximo (L)':capMax, 'Cadena Frío':frio, Estado:estado});
       });
       return cumplimiento;
     })(),
-    'Vehículos':S.vehiculos.map(v=>({'Placa del vehículo':v.nombre,Tipo:v.tipo,'Capacidad L':v.capacidad,'Costo $/km':v.costoKm,'Permiso ANT (Vencimiento)':v.fechaVencimiento||'—','Cadena de Frío':v.estadoFrio==='funciona'?'Funciona':'No funciona'}))
+    'Vehículos':S.vehiculos.map(v=>{let minCap=(v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : 0)); let maxCap=(v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0)); let capLabel=minCap && maxCap ? (minCap===maxCap ? maxCap : `${minCap} - ${maxCap}`) : '—'; return ({'Placa del vehículo':v.nombre,Tipo:v.tipo,'Capacidad L':capLabel,'Costo $/km':v.costoKm,'Permiso ANT (Vencimiento)':v.fechaVencimiento||'—','Cadena de Frío':v.estadoFrio==='funciona'?'Funciona':'No funciona'})})
   };
   Object.entries(sh).forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(d),n));
   XLSX.writeFile(wb,`optilactea_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -1064,26 +1209,27 @@ function expCSV(tipo){
   else if(tipo==='acopios')csv='Nombre,Cantón,CostoOp\n'+S.acopios.map(a=>`${a.nombre},${a.canton},${a.costoOp}`).join('\n');
   else if(tipo==='plantas')csv='Nombre,Cantón,CostoProc\n'+S.plantas.map(p=>`${p.nombre},${p.canton},${p.costoProc}`).join('\n');
   else if(tipo==='destinos')csv='Nombre,Tipo,Demanda,Precio\n'+S.destinos.map(d=>`${d.nombre},${d.tipo},${d.demanda},${d.precio}`).join('\n');
-  else if(tipo==='vehiculos')csv='Placa,Tipo,Capacidad,CostoKm,Permiso ANT,Cadena Frío\n'+S.vehiculos.map(v=>`${v.nombre},${v.tipo},${v.capacidad},${v.costoKm},${v.fechaVencimiento||'—'},${v.estadoFrio==='funciona'?'Funciona':'No funciona'}`).join('\n');
+  else if(tipo==='vehiculos')csv='Placa,Tipo,Capacidad mínima,Capacidad máxima,CostoKm,Permiso ANT,Cadena Frío\n'+S.vehiculos.map(v=>{let minCap=(v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : 0)); let maxCap=(v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : 0)); return `${v.nombre},${v.tipo},${minCap},${maxCap},${v.costoKm},${v.fechaVencimiento||'—'},${v.estadoFrio==='funciona'?'Funciona':'No funciona'}`}).join('\n');
   else if(tipo==='flujos')csv='#,Productor,Acopio,Planta,Destino,Litros\n'+S.flujos.map((f,i)=>`${i+1},${S.productores[f.prod]?.nombre||''},${S.acopios[f.acop]?.nombre||''},${S.plantas[f.plan]?.nombre||''},${S.destinos[f.dest]?.nombre||''},${f.litros}`).join('\n');
   else if(tipo==='legales'){
     let cumplimiento = [];
-    S.asignaciones.forEach(asig => {
-      let veh = S.vehiculos[asig.vehiculoIdx];
-      let ruta = S.flujos[asig.rutaIdx];
-      let rutaNombre = `Ruta ${asig.rutaIdx + 1}: ${ruta.orig} → ${ruta.dest}`;
-      let vigencia = 'Vencido';
-      if (veh.fechaVencimiento) {
-        let hoy = new Date();
-        let venc = new Date(veh.fechaVencimiento);
-        if (venc >= hoy) vigencia = 'Vigente';
+    S.flujos.forEach((ruta,ri)=>{
+      let p=S.productores[ruta.prod]?.nombre||'?';
+      let d=S.destinos[ruta.dest]?.nombre||'?';
+      let asig=S.asignaciones.find(a=>a.rutaIdx===ri);
+      if(!asig){
+        cumplimiento.push(`Ruta ${ri+1}: ${p} → ${d},—,—,—,0,—,Incumple`);
+        return;
       }
-      let frio = veh.estadoFrio === 'funciona' ? 'Funciona' : 'No funciona';
-      let pesoOK = asig.litros <= veh.capacidad;
-      let permisoOK = vigencia === 'Vigente';
-      let frioOK = veh.estadoFrio === 'funciona';
-      let estado = (pesoOK && permisoOK && frioOK) ? 'Cumple' : 'Incumple';
-      cumplimiento.push(`${rutaNombre},${veh.nombre},${veh.tipo},${vigencia},${veh.capacidad},${frio},${estado}`);
+      let veh=S.vehiculos[asig.vehiculoIdx];
+      let hoy=new Date(); hoy.setHours(0,0,0,0);
+      let vigencia='Vigente';
+      if(veh.fechaVencimiento){let venc=new Date(veh.fechaVencimiento); if(venc<hoy) vigencia='Vencido';}
+      let capMax=(veh.capacidadMax!=null ? veh.capacidadMax : (veh.capacidad!=null ? veh.capacidad : 0));
+      let frio=veh.estadoFrio==='funciona'?'Funciona':'No funciona';
+      let pesoOK=asig.litros<=capMax; let permisoOK=vigencia==='Vigente'; let frioOK=veh.estadoFrio==='funciona';
+      let estado=(pesoOK&&permisoOK&&frioOK)?'Cumple':'Incumple';
+      cumplimiento.push(`Ruta ${ri+1}: ${p} → ${d},${veh.nombre},${veh.tipo},${vigencia},${capMax},${frio},${estado}`);
     });
     csv='Ruta,Placa,Tipo de Camión,Vigencia Permiso,Peso Máximo (L),Cadena Frío,Estado\n' + cumplimiento.join('\n');
   }
@@ -1113,16 +1259,16 @@ function abrirM(id,idx){
   if(id==='mProd'){
     EI.prod=idx;
     let p=idx>=0?S.productores[idx]:{};
-    document.getElementById('mPN').value=p.nombre||'';document.getElementById('mPC').value=p.canton||'';
+    document.getElementById('mPN').value=p.nombre||'';document.getElementById('mPC').value=p.canton||'';document.getElementById('mPP').value=p.parroquia||'';
     document.getElementById('mPO').value=p.oferta||'';document.getElementById('mPK').value=p.costo||'';
     document.getElementById('mPLa').value=p.lat||'';document.getElementById('mPLo').value=p.lng||'';
   }else if(id==='mAcop'){
     EI.acop=idx;let a=idx>=0?S.acopios[idx]:{};
-    document.getElementById('mAN').value=a.nombre||'';document.getElementById('mAC').value=a.canton||'';
+    document.getElementById('mAN').value=a.nombre||'';document.getElementById('mAC').value=a.canton||'';document.getElementById('mAP').value=a.parroquia||'';
     document.getElementById('mAK').value=a.costoOp||'';document.getElementById('mALa').value=a.lat||'';document.getElementById('mALo').value=a.lng||'';
   }else if(id==='mPlan'){
     EI.plan=idx;let p=idx>=0?S.plantas[idx]:{};
-    document.getElementById('mPlN').value=p.nombre||'';document.getElementById('mPlC').value=p.canton||'';
+    document.getElementById('mPlN').value=p.nombre||'';document.getElementById('mPlC').value=p.canton||'';document.getElementById('mPlP').value=p.parroquia||'';
     document.getElementById('mPlK').value=p.costoProc||'';document.getElementById('mPlLa').value=p.lat||'';document.getElementById('mPlLo').value=p.lng||'';
   }else if(id==='mDest'){
     EI.dest=idx;let d=idx>=0?S.destinos[idx]:{};
@@ -1132,7 +1278,9 @@ function abrirM(id,idx){
   }else if(id==='mVeh'){
     EI.veh=idx;let v=idx>=0?S.vehiculos[idx]:{};
     document.getElementById('mVN').value=v.nombre||'';document.getElementById('mVT').value=v.tipo||'Camión pequeño';
-    document.getElementById('mVC').value=v.capacidad||'';document.getElementById('mVK').value=v.costoKm||'';
+    document.getElementById('mVCmin').value=(v.capacidadMin!=null ? v.capacidadMin : (v.capacidad!=null ? v.capacidad : ''));
+    document.getElementById('mVCmax').value=(v.capacidadMax!=null ? v.capacidadMax : (v.capacidad!=null ? v.capacidad : ''));
+    document.getElementById('mVK').value=v.costoKm||'';
     document.getElementById('mVFec').value=v.fechaVencimiento||'';document.getElementById('mVFrio').value=v.estadoFrio||'funciona';
   }
 }
@@ -1141,7 +1289,7 @@ window.onclick=e=>{if(e.target.classList.contains('modal-bg'))e.target.classList
 
 function savProd(){
   let n=document.getElementById('mPN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mPC').value.trim(),oferta:parseFloat(document.getElementById('mPO').value)||0,costo:parseFloat(document.getElementById('mPK').value)||0,lat:parseFloat(document.getElementById('mPLa').value)||null,lng:parseFloat(document.getElementById('mPLo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mPC').value.trim(),parroquia:document.getElementById('mPP').value.trim(),oferta:parseFloat(document.getElementById('mPO').value)||0,costo:parseFloat(document.getElementById('mPK').value)||0,lat:parseFloat(document.getElementById('mPLa').value)||null,lng:parseFloat(document.getElementById('mPLo').value)||null};
   if(EI.prod>=0)S.productores[EI.prod]=o;else S.productores.push(o);
   cerrarM('mProd');renderAll();
 }
@@ -1154,7 +1302,7 @@ function dProd(i){
 
 function savAcop(){
   let n=document.getElementById('mAN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mAC').value.trim(),costoOp:parseFloat(document.getElementById('mAK').value)||0,lat:parseFloat(document.getElementById('mALa').value)||null,lng:parseFloat(document.getElementById('mALo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mAC').value.trim(),parroquia:document.getElementById('mAP').value.trim(),costoOp:parseFloat(document.getElementById('mAK').value)||0,lat:parseFloat(document.getElementById('mALa').value)||null,lng:parseFloat(document.getElementById('mALo').value)||null};
   if(EI.acop>=0)S.acopios[EI.acop]=o;else S.acopios.push(o);
   cerrarM('mAcop');renderAll();
 }
@@ -1167,7 +1315,7 @@ function dAcop(i){
 
 function savPlan(){
   let n=document.getElementById('mPlN').value.trim();if(!n){alert('⚠️ Nombre obligatorio');return;}
-  let o={nombre:n,canton:document.getElementById('mPlC').value.trim(),costoProc:parseFloat(document.getElementById('mPlK').value)||0,lat:parseFloat(document.getElementById('mPlLa').value)||null,lng:parseFloat(document.getElementById('mPlLo').value)||null};
+  let o={nombre:n,canton:document.getElementById('mPlC').value.trim(),parroquia:document.getElementById('mPlP').value.trim(),costoProc:parseFloat(document.getElementById('mPlK').value)||0,lat:parseFloat(document.getElementById('mPlLa').value)||null,lng:parseFloat(document.getElementById('mPlLo').value)||null};
   if(EI.plan>=0)S.plantas[EI.plan]=o;else S.plantas.push(o);
   cerrarM('mPlan');renderAll();
 }
@@ -1193,7 +1341,10 @@ function dDest(i){
 
 function savVeh(){
   let n=document.getElementById('mVN').value.trim();if(!n){alert('⚠️ Placa del vehículo obligatoria');return;}
-  let o={nombre:n,tipo:document.getElementById('mVT').value,capacidad:parseFloat(document.getElementById('mVC').value)||0,costoKm:parseFloat(document.getElementById('mVK').value)||0,fechaVencimiento:document.getElementById('mVFec').value||'',estadoFrio:document.getElementById('mVFrio').value||'funciona'};
+  let minCap=parseFloat(document.getElementById('mVCmin').value)||0;
+  let maxCap=parseFloat(document.getElementById('mVCmax').value)||0;
+  if(minCap>maxCap){alert('⚠️ La capacidad mínima no puede ser mayor que la máxima');return;}
+  let o={nombre:n,tipo:document.getElementById('mVT').value,capacidadMin:minCap,capacidadMax:maxCap,costoKm:parseFloat(document.getElementById('mVK').value)||0,fechaVencimiento:document.getElementById('mVFec').value||'',estadoFrio:document.getElementById('mVFrio').value||'funciona'};
   if(EI.veh>=0)S.vehiculos[EI.veh]=o;else S.vehiculos.push(o);
   cerrarM('mVeh');renderAll();
 }
