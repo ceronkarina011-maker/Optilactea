@@ -238,7 +238,7 @@ label{font-size:.68rem;font-weight:700;color:var(--gm);display:block;margin-bott
         <button class="btn bs" onclick="copiarTbl()">📋 Copiar</button>
       </div>
     </div>
-    <div class="tbl"><table id="tblOpt"><thead><tr><th>#</th><th>Origen (Finca)</th><th>Centro Acopio</th><th>Planta</th><th>Destino</th><th class="num">Litros/día</th><th class="num">Distancia (km)</th><th class="num">Costo ($)</th><th>🚛 Vehículo Asignado</th></tr></thead><tbody id="tbOpt"><tr><td colspan="9" style="text-align:center;padding:28px;color:var(--g400)">Presiona "Optimizar"</td></tr></tbody></table></div>
+    <div class="tbl"><table id="tblOpt"><thead><tr><th>#</th><th>Origen (Finca)</th><th>Centro Acopio</th><th>Planta</th><th>Destino</th><th class="num">Litros/día</th><th class="num">Distancia (km)</th><th class="num">Costo ($)</th><th>Estado</th><th>🚛 Vehículo Asignado</th></tr></thead><tbody id="tbOpt"><tr><td colspan="10" style="text-align:center;padding:28px;color:var(--g400)">Presiona "Optimizar"</td></tr></tbody></table></div>
   </div>
   <div class="card">
     <div class="ct">🧭 RUTAS SELECCIONADAS</div>
@@ -649,7 +649,12 @@ function optimizar(){
       dist = haversine(p.lat,p.lng,a.lat,a.lng)+haversine(a.lat,a.lng,pl.lat,pl.lng)+haversine(pl.lat,pl.lng,d.lat,d.lng);
     }
     let co=+(dist*costoKm).toFixed(2);
-    let ef=f.litros/cap;
+    // Utilización respecto a la capacidad del vehículo asignado (si existe),
+    // de lo contrario usar parámetro general de capacidad
+    let asignOpt=(S.asignacionesOpt||[]).find(as=>as.rutaIdx===i);
+    let vehOpt=asignOpt?S.vehiculos[asignOpt.vehiculoIdx]:null;
+    let vCapMax = vehOpt ? (vehOpt.capacidadMax!=null ? vehOpt.capacidadMax : (vehOpt.capacidad!=null ? vehOpt.capacidad : cap)) : cap;
+    let ef=f.litros/Math.max(1,vCapMax);
     return{idx:i+1,orig:p?.nombre||'—',acop:a?.nombre||'—',plan:pl?.nombre||'—',dest:d?.nombre||'—',litros:f.litros,dist, costo:co,ef};
   });
   let coTot=filas.reduce((s,a)=>s+a.costo,0);
@@ -661,11 +666,12 @@ function optimizar(){
   document.getElementById('tL').textContent=ltT.toLocaleString()+' L';
   document.getElementById('tR').textContent=filas.length;
   tb.innerHTML=filas.map((a,i)=>{
-    let ef=a.ef>=0.7?`<span class="badge bok">Óptima</span>`:a.ef>=0.5?`<span class="badge bwrn">Aceptable</span>`:`<span class="badge berr">Ineficiente</span>`;
+    let utilPct=Math.max(0,Math.min(100,Math.round(a.ef*100)));
+    let ef=a.ef>=0.7?`<span class="badge bok" title="Utilización ${utilPct}%">Eficiente</span>`:a.ef>=0.5?`<span class="badge bwrn" title="Utilización ${utilPct}%">Aceptable</span>`:`<span class="badge berr" title="Utilización ${utilPct}%">Ineficiente</span>`;
     // Vehículo asignado (óptimo)
     let asignada=(S.asignacionesOpt||[]).find(as=>as.rutaIdx===i);
     let vehNombre=asignada?S.vehiculos[asignada.vehiculoIdx]?.nombre:'—';
-    return`<tr><td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${a.idx}</td><td><strong>${a.orig}</strong></td><td>${a.acop}</td><td>${a.plan}</td><td>${a.dest}</td><td class="num"><strong>${a.litros.toLocaleString()}</strong></td><td class="num">${a.dist.toFixed(1)} km</td><td class="num" style="color:var(--gm);font-weight:700">$${a.costo.toFixed(2)}</td><td><span style="font-size:.72rem;color:var(--gm);font-weight:600">🚛 ${vehNombre}</span></td></tr>`;
+    return`<tr><td style="font-family:var(--mo);font-weight:700;color:var(--gm)">${a.idx}</td><td><strong>${a.orig}</strong></td><td>${a.acop}</td><td>${a.plan}</td><td>${a.dest}</td><td class="num"><strong>${a.litros.toLocaleString()}</strong></td><td class="num">${a.dist.toFixed(1)} km</td><td class="num" style="color:var(--gm);font-weight:700">$${a.costo.toFixed(2)}</td><td>${ef}</td><td><span style="font-size:.72rem;color:var(--gm);font-weight:600">🚛 ${vehNombre}</span></td></tr>`;
   }).join('');
   document.getElementById('rutasV').innerHTML=filas.map(a=>`<div class="rv"><div class="rvh"><span class="rvn">🛣️ Ruta ${a.idx}: ${a.orig} → ${a.dest}</span><span class="rvl">${a.litros.toLocaleString()} L · ${a.dist.toFixed(1)} km · $${a.costo.toFixed(2)}</span></div><div class="rvp"><span class="rn">🏡 ${a.orig}</span><span class="ra">→</span><span class="rn">🧊 ${a.acop}</span><span class="ra">→</span><span class="rn">🏭 ${a.plan}</span><span class="ra">→</span><span class="rn">🏪 ${a.dest}</span></div></div>`).join('');
   let mx=Math.max(...filas.map(a=>a.litros),1);
